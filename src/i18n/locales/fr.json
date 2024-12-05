@@ -1,0 +1,170 @@
+{
+  "translation": {
+    "menu": {
+      "dashboard": "Tableau de bord",
+      "projects": "Mes projets",
+      "newProject": "Créer un projet",
+      "archivedProjects": "Projets archivés",
+      "articles": "Mes articles",
+      "personas": "Mes personas",
+      "newPersona": "Créer un persona",
+      "sites": "Mes Sites",
+      "settings": "Paramètres"
+    },
+    "sections": {
+      "projects": "MES PROJETS",
+      "articles": "MES ARTICLES",
+      "personas": "MES PERSONAS"
+    },
+    "dashboard": {
+      "title": "Tableau de bord",
+      "welcome": "Bienvenue sur votre tableau de bord",
+      "stats": {
+        "totalProjects": "Projets totaux",
+        "activeProjects": "Projets actifs",
+        "completedProjects": "Projets terminés",
+        "totalArticles": "Articles totaux",
+        "publishedArticles": "Articles publiés",
+        "draftArticles": "Articles en brouillon"
+      },
+      "recentActivity": "Activité récente",
+      "quickActions": "Actions rapides",
+      "createNewProject": "Créer un nouveau projet",
+      "createNewArticle": "Créer un nouvel article",
+      "viewAllProjects": "Voir tous les projets"
+    },
+    "projects": {
+      "title": "Gestion des projets",
+      "createNew": "Créer un nouveau projet",
+      "filter": "Filtrer les projets",
+      "search": "Rechercher un projet",
+      "status": {
+        "active": "Actif",
+        "completed": "Terminé",
+        "archived": "Archivé",
+        "draft": "Brouillon"
+      },
+      "sort": {
+        "newest": "Plus récent",
+        "oldest": "Plus ancien",
+        "nameAZ": "Nom (A-Z)",
+        "nameZA": "Nom (Z-A)"
+      },
+      "fields": {
+        "name": "Nom du projet",
+        "description": "Description",
+        "status": "Statut",
+        "createdAt": "Créé le",
+        "updatedAt": "Mis à jour le",
+        "deadline": "Date limite"
+      }
+    },
+    "articles": {
+      "title": "Gestion des articles",
+      "createNew": "Créer un nouvel article",
+      "filter": "Filtrer les articles",
+      "search": "Rechercher un article",
+      "generate": "Générer du contenu",
+      "publish": "Publier",
+      "save": "Enregistrer",
+      "preview": "Aperçu",
+      "status": {
+        "published": "Publié",
+        "draft": "Brouillon",
+        "scheduled": "Programmé",
+        "archived": "Archivé"
+      },
+      "fields": {
+        "title": "Titre",
+        "content": "Contenu",
+        "keywords": "Mots-clés",
+        "category": "Catégorie",
+        "author": "Auteur",
+        "publishDate": "Date de publication"
+      }
+    },
+    "personas": {
+      "title": "Gestion des personas",
+      "createNew": "Créer un nouveau persona",
+      "edit": "Modifier le persona",
+      "delete": "Supprimer",
+      "fields": {
+        "name": "Nom",
+        "description": "Description",
+        "tone": "Ton de voix",
+        "style": "Style d'écriture",
+        "audience": "Public cible"
+      }
+    },
+    "sites": {
+      "title": "Mes Sites",
+      "newSite": "Nouveau Site",
+      "editSite": "Modifier le site",
+      "deleteSite": "Supprimer le site",
+      "siteName": "Nom du site",
+      "siteUrl": "URL du site",
+      "siteType": "Type de site",
+      "apiKey": "Clé API",
+      "categories": "Catégories",
+      "autoPublish": "Publication automatique",
+      "lastSync": "Dernière synchronisation",
+      "articlesCount": "Articles publiés",
+      "status": {
+        "connected": "Connecté",
+        "error": "Erreur",
+        "pending": "En attente"
+      },
+      "type": {
+        "wordpress": "WordPress",
+        "custom": "Personnalisé"
+      },
+      "actions": {
+        "sync": "Synchroniser",
+        "settings": "Paramètres API"
+      },
+      "errors": {
+        "connection": "Erreur de connexion. Veuillez vérifier vos identifiants."
+      }
+    },
+    "settings": {
+      "title": "Paramètres",
+      "language": "Langue",
+      "chooseLanguage": "Choisir la langue",
+      "theme": {
+        "title": "Thème",
+        "light": "Clair",
+        "dark": "Sombre",
+        "system": "Système"
+      },
+      "account": {
+        "title": "Compte",
+        "profile": "Profil",
+        "preferences": "Préférences",
+        "notifications": "Notifications",
+        "security": "Sécurité"
+      },
+      "api": {
+        "title": "Configuration API",
+        "openai": "OpenAI API",
+        "wordpress": "WordPress API"
+      }
+    },
+    "common": {
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "create": "Créer",
+      "search": "Rechercher",
+      "filter": "Filtrer",
+      "sort": "Trier",
+      "loading": "Chargement...",
+      "noResults": "Aucun résultat",
+      "error": "Erreur",
+      "success": "Succès",
+      "confirm": "Confirmer",
+      "actions": "Actions",
+      "status": "Statut"
+    }
+  }
+}

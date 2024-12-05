@@ -1,0 +1,169 @@
+{
+  "translation": {
+    "menu": {
+      "dashboard": "Dashboard",
+      "projects": "My Projects",
+      "newProject": "Create Project",
+      "archivedProjects": "Archived Projects",
+      "articles": "My Articles",
+      "personas": "My Personas",
+      "newPersona": "Create Persona",
+      "sites": "My Sites",
+      "settings": "Settings"
+    },
+    "sections": {
+      "projects": "MY PROJECTS",
+      "articles": "MY ARTICLES",
+      "personas": "MY PERSONAS"
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "welcome": "Welcome to your dashboard",
+      "stats": {
+        "totalProjects": "Total Projects",
+        "activeProjects": "Active Projects",
+        "completedProjects": "Completed Projects",
+        "totalArticles": "Total Articles",
+        "publishedArticles": "Published Articles",
+        "draftArticles": "Draft Articles"
+      },
+      "recentActivity": "Recent Activity",
+      "quickActions": "Quick Actions",
+      "createNewProject": "Create New Project",
+      "createNewArticle": "Create New Article",
+      "viewAllProjects": "View All Projects"
+    },
+    "projects": {
+      "title": "Project Management",
+      "createNew": "Create New Project",
+      "filter": "Filter Projects",
+      "search": "Search Projects",
+      "status": {
+        "active": "Active",
+        "completed": "Completed",
+        "archived": "Archived",
+        "draft": "Draft"
+      },
+      "sort": {
+        "newest": "Newest",
+        "oldest": "Oldest",
+        "nameAZ": "Name (A-Z)",
+        "nameZA": "Name (Z-A)"
+      },
+      "fields": {
+        "name": "Project Name",
+        "description": "Description",
+        "status": "Status",
+        "createdAt": "Created At",
+        "updatedAt": "Updated At",
+        "deadline": "Deadline"
+      }
+    },
+    "articles": {
+      "title": "Article Management",
+      "createNew": "Create New Article",
+      "filter": "Filter Articles",
+      "search": "Search Articles",
+      "generate": "Generate Content",
+      "publish": "Publish",
+      "save": "Save",
+      "preview": "Preview",
+      "status": {
+        "published": "Published",
+        "draft": "Draft",
+        "scheduled": "Scheduled",
+        "archived": "Archived"
+      },
+      "fields": {
+        "title": "Title",
+        "content": "Content",
+        "keywords": "Keywords",
+        "category": "Category",
+        "author": "Author",
+        "publishDate": "Publish Date"
+      }
+    },
+    "personas": {
+      "title": "Persona Management",
+      "createNew": "Create New Persona",
+      "edit": "Edit Persona",
+      "delete": "Delete",
+      "fields": {
+        "name": "Name",
+        "description": "Description",
+        "tone": "Tone of Voice",
+        "style": "Writing Style",
+        "audience": "Target Audience"
+      }
+    },
+    "sites": {
+      "title": "My Sites",
+      "newSite": "New Site",
+      "editSite": "Edit Site",
+      "deleteSite": "Delete Site",
+      "siteName": "Site Name",
+      "siteUrl": "Site URL",
+      "siteType": "Site Type",
+      "apiKey": "API Key",
+      "categories": "Categories",
+      "autoPublish": "Auto Publish",
+      "lastSync": "Last Sync",
+      "articlesCount": "Published Articles",
+      "status": {
+        "connected": "Connected",
+        "error": "Error",
+        "pending": "Pending"
+      },
+      "type": {
+        "wordpress": "WordPress",
+        "custom": "Custom"
+      },
+      "actions": {
+        "sync": "Sync",
+        "settings": "API Settings"
+      },
+      "errors": {
+        "connection": "Connection error. Please check your credentials."
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "language": "Language",
+      "chooseLanguage": "Choose Language",
+      "theme": {
+        "title": "Theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "account": {
+        "title": "Account",
+        "profile": "Profile",
+        "preferences": "Preferences",
+        "notifications": "Notifications",
+        "security": "Security"
+      },
+      "api": {
+        "title": "API Configuration",
+        "openai": "OpenAI API",
+        "wordpress": "WordPress API"
+      }
+    },
+    "common": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "edit": "Edit",
+      "create": "Create",
+      "search": "Search",
+      "filter": "Filter",
+      "sort": "Sort",
+      "loading": "Loading...",
+      "noResults": "No Results",
+      "error": "Error",
+      "success": "Success",
+      "confirm": "Confirm",
+      "actions": "Actions"
+    }
+  }
+}
