@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -32,6 +32,9 @@ import {
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../auth/AuthProvider';
+import { firestoreService } from '../../services/firestore';
+import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 
 interface Article {
   id: string;
@@ -46,45 +49,36 @@ interface Article {
 
 export const ArticlesList = () => {
   const { t } = useTranslation();
+  const { currentUser } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedArticle, setSelectedArticle] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [projectFilter, setProjectFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Données simulées
-  const articles: Article[] = [
-    {
-      id: '1',
-      title: 'Les tendances IA en 2024',
-      project: 'Blog Tech Innovation',
-      status: 'published',
-      publishDate: '2024-01-15',
-      excerpt: 'Découvrez les dernières avancées en intelligence artificielle...',
-      persona: 'Tech Enthusiast',
-      wordCount: 1200
-    },
-    {
-      id: '2',
-      title: 'Guide du Content Marketing',
-      project: 'Guide Marketing Digital',
-      status: 'scheduled',
-      publishDate: '2024-01-20',
-      excerpt: 'Un guide complet pour maîtriser le content marketing...',
-      persona: 'Marketing Manager',
-      wordCount: 2500
-    },
-    {
-      id: '3',
-      title: 'Newsletter #45',
-      project: 'Newsletter Hebdomadaire',
-      status: 'draft',
-      publishDate: '2024-01-13',
-      excerpt: 'Les actualités tech de la semaine...',
-      persona: 'Tech Reader',
-      wordCount: 800
-    }
-  ];
+  useEffect(() => {
+    const fetchArticles = async () => {
+      if (!currentUser) return;
+
+      try {
+        const articlesSnapshot = await firestoreService.getArticlesByProject(currentUser.uid);
+        const articlesData = articlesSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+          id: doc.id,
+          ...doc.data()
+        } as Article));
+
+        setArticles(articlesData);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des articles:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticles();
+  }, [currentUser]);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>, articleId: string) => {
     setAnchorEl(event.currentTarget);

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Box, AppBar, Toolbar, IconButton, Typography, useTheme, useMediaQuery } from '@mui/material';
 import { Menu as MenuIcon } from '@mui/icons-material';
+import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
+import { UserProfile } from '../auth/UserProfile';
 
-interface LayoutProps {
-  children: React.ReactNode;
-}
-
-export const Layout: React.FC<LayoutProps> = ({ children }) => {
+export const Layout: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const isMediumScreen = useMediaQuery(theme.breakpoints.between('sm', 'md'));
@@ -37,9 +35,27 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Content Generator
           </Typography>
+          <UserProfile />
+        </Toolbar>
+      </AppBar>
+
+      {/* AppBar for desktop */}
+      <AppBar
+        position="fixed"
+        sx={{
+          display: { xs: 'none', sm: 'block' },
+          width: { sm: `calc(100% - ${240}px)` },
+          ml: { sm: `${240}px` },
+        }}
+      >
+        <Toolbar>
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+            Content Generator
+          </Typography>
+          <UserProfile />
         </Toolbar>
       </AppBar>
 
@@ -55,15 +71,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: '100%',
-          mt: { xs: 7, sm: 0 }, // Add margin-top on mobile for AppBar
-          transition: theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
+          width: { sm: `calc(100% - ${240}px)` },
+          mt: { xs: 7, sm: 8 },
         }}
       >
-        {children}
+        <Outlet />
       </Box>
     </Box>
   );

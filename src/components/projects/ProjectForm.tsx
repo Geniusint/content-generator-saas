@@ -23,7 +23,7 @@ import { PersonaModal } from '../personas/PersonaModal';
 import { SiteModal } from '../sites/SiteModal';
 import { Project, Site, Persona } from '../../services/firestore';
 
-interface ContentGeneratorProps {
+interface ProjectFormProps {
   persona?: string;
   keywords?: string[];
   mode?: 'page' | 'modal';
@@ -31,7 +31,7 @@ interface ContentGeneratorProps {
   onClose?: () => void;
 }
 
-export const ContentGenerator: React.FC<ContentGeneratorProps> = ({
+export const ProjectForm: React.FC<ProjectFormProps> = ({
   persona = '',
   keywords = [],
   mode = 'page',
@@ -109,6 +109,7 @@ export const ContentGenerator: React.FC<ContentGeneratorProps> = ({
     if (newPersona.id) {
       setSelectedPersona(newPersona.id);
     }
+    setIsPersonaModalOpen(false);
   };
 
   const handleSiteCreated = (newSite: Site) => {
@@ -116,7 +117,7 @@ export const ContentGenerator: React.FC<ContentGeneratorProps> = ({
     if (newSite.id) {
       setSelectedSite(newSite.id);
     }
-    setIsSiteModalOpen(false);  // Fermer le modal après la création
+    setIsSiteModalOpen(false);
   };
 
   const renderForm = () => (
@@ -226,10 +227,10 @@ export const ContentGenerator: React.FC<ContentGeneratorProps> = ({
       ) : (
         <>
           <DialogTitle>Créer un nouveau projet</DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ p: 3 }}>
             {renderForm()}
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ px: 3, pb: 3 }}>
             <Button onClick={onClose}>Annuler</Button>
           </DialogActions>
         </>

@@ -2,13 +2,13 @@
   "translation": {
     "menu": {
       "dashboard": "Tableau de bord",
-      "projects": "Mes projets",
+      "projects": "Mes Projets",
       "newProject": "Créer un projet",
       "archivedProjects": "Projets archivés",
-      "articles": "Mes articles",
-      "personas": "Mes personas",
+      "articles": "Articles",
+      "personas": "Personas",
       "newPersona": "Créer un persona",
-      "sites": "Mes Sites",
+      "sites": "Sites",
       "settings": "Paramètres"
     },
     "sections": {
@@ -57,7 +57,11 @@
         "createdAt": "Créé le",
         "updatedAt": "Mis à jour le",
         "deadline": "Date limite"
-      }
+      },
+      "myProjects": "Mes Projets",
+      "createNew": "Créer un nouveau projet",
+      "noProjects": "Vous n'avez pas encore de projets",
+      "createFirstProject": "Créer mon premier projet"
     },
     "articles": {
       "title": "Gestion des articles",
@@ -150,6 +154,7 @@
       }
     },
     "common": {
+      "appName": "Content Generator",
       "save": "Enregistrer",
       "cancel": "Annuler",
       "delete": "Supprimer",
