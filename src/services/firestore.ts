@@ -65,9 +65,18 @@ export interface Persona {
   id?: string;
   userId: string;
   name: string;
-  description: string;
+  avatar: string;
+  role: string;
+  age: number;
+  location: string;
+  language: string; // Changé de languages[] à language
+  education: string;
+  interests: string[];
+  goals: string[];
+  painPoints: string[];
+  preferredContent: string[];
   tone: string;
-  keywords: string[];
+  description: string;
 }
 
 export interface Site {
@@ -242,8 +251,36 @@ export class FirestoreService {
     return getDocs(q);
   }
 
-  async createPersona(persona: Omit<Persona, 'id' | 'userId'>) {
-    return this.create<Persona>('personas', persona as Persona);
+  async createPersona(personaData: Omit<Persona, 'id' | 'userId'>) {
+    try {
+      const userId = await this.ensureUser();
+      console.log('Creating persona with userId:', userId);
+
+      const personasCollection = collection(this.db, 'personas');
+      const personaRef = doc(personasCollection);
+      
+      const completePersonaData = {
+        id: personaRef.id,
+        ...personaData,
+        userId
+      };
+
+      await setDoc(personaRef, completePersonaData);
+      console.log('Persona created successfully:', personaRef.id);
+      
+      return personaRef;
+    } catch (error) {
+      console.error('Error in createPersona:', error);
+      throw error;
+    }
+  }
+
+  async updatePersona(personaId: string, personaData: Partial<Omit<Persona, 'id' | 'userId'>>) {
+    return this.update('personas', personaId, personaData);
+  }
+
+  async deletePersona(personaId: string) {
+    return this.delete('personas', personaId);
   }
 
   // Sites methods

@@ -1,210 +1,295 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Grid, 
-  Paper, 
-  Button, 
-  Card, 
-  CardContent, 
-  CardActions, 
-  Chip, 
-  LinearProgress, 
-  Container, 
-  Dialog 
+import {
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Alert,
+  Snackbar
 } from '@mui/material';
-import { Navigate } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
-import ArticleIcon from '@mui/icons-material/Article';
-import WebIcon from '@mui/icons-material/Web';
-import PersonIcon from '@mui/icons-material/Person';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-
-import { firestoreService } from '../services/firestore';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon
+} from '@mui/icons-material';
 import { useAuth } from '../components/auth/AuthProvider';
-import { Project } from '../services/firestore';
-import { ProjectForm } from '../components/projects/ProjectForm';
+import { firestoreService, Project } from '../services/firestore';
+import { Timestamp } from 'firebase/firestore';
 
-export const ProjectsPage: React.FC = () => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { currentUser, loading } = useAuth();
+const initialProjectState: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'articleCount'> = {
+  name: '',
+  site: {
+    id: '',
+    name: ''
+  },
+  persona: {
+    id: '',
+    name: ''
+  },
+  status: 'draft'
+};
 
-  const [projects, setProjects] = useState<(Project & { id: string })[]>([]);
-  const [projectsLoading, setProjectsLoading] = useState(true);
-  const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
+export const ProjectsPage = () => {
+  const { currentUser } = useAuth();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [currentProject, setCurrentProject] = useState<typeof initialProjectState>(initialProjectState);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [snackbar, setSnackbar] = useState<{open: boolean; message: string; severity: 'success' | 'error'}>({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      if (!currentUser) return;
-
-      try {
-        const projectsSnapshot = await firestoreService.getProjects();
-        const projectsData = projectsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Project & { id: string }));
-
-        setProjects(projectsData);
-        setProjectsLoading(false);
-      } catch (error) {
-        console.error('Erreur lors du chargement des projets', error);
-        setProjectsLoading(false);
-      }
-    };
-
     if (currentUser) {
-      fetchProjects();
+      loadProjects();
     }
   }, [currentUser]);
 
-  const getStatusColor = (status: Project['status']): 'success' | 'primary' | 'warning' | 'secondary' => {
-    switch (status) {
-      case 'active': return 'success';
-      case 'completed': return 'primary';
-      case 'draft': return 'warning';
-      default: return 'secondary';
+  const loadProjects = async () => {
+    try {
+      setLoading(true);
+      const snapshot = await firestoreService.getProjects();
+      const loadedProjects = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Project[];
+      setProjects(loadedProjects);
+      setError(null);
+    } catch (error) {
+      console.error('Error loading projects:', error);
+      setError('Erreur lors du chargement des projets');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const renderProjectCard = (project: Project & { id: string }) => (
-    <Grid item xs={12} sm={6} md={4} key={project.id}>
-      <Card 
-        elevation={3} 
-        sx={{ 
-          height: '100%', 
-          display: 'flex', 
-          flexDirection: 'column',
-          transition: 'transform 0.2s',
-          '&:hover': {
-            transform: 'scale(1.02)',
-          }
-        }}
-      >
-        <CardContent sx={{ flexGrow: 1 }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" component="div">
-              {project.name}
-            </Typography>
-            <Chip 
-              label={project.status} 
-              color={getStatusColor(project.status)} 
-              size="small" 
-            />
-          </Box>
+  const handleOpenDialog = (edit: boolean = false, project?: Project) => {
+    if (edit && project) {
+      setCurrentProject({
+        name: project.name,
+        site: project.site,
+        persona: project.persona,
+        status: project.status
+      });
+      setSelectedProjectId(project.id);
+    } else {
+      setCurrentProject(initialProjectState);
+      setSelectedProjectId(null);
+    }
+    setEditMode(edit);
+    setOpenDialog(true);
+  };
 
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <WebIcon sx={{ mr: 1, color: 'text.secondary' }} />
-            <Typography variant="body2" color="text.secondary">
-              {project.site.name}
-            </Typography>
-          </Box>
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setEditMode(false);
+    setCurrentProject(initialProjectState);
+    setSelectedProjectId(null);
+  };
 
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} />
-            <Typography variant="body2" color="text.secondary">
-              {project.persona.name}
-            </Typography>
-          </Box>
+  const handleSaveProject = async () => {
+    if (!currentUser) {
+      setSnackbar({
+        open: true,
+        message: 'Vous devez être connecté pour créer un projet',
+        severity: 'error'
+      });
+      return;
+    }
 
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-            <ArticleIcon sx={{ mr: 1, color: 'text.secondary' }} />
-            <Typography variant="body2" color="text.secondary">
-              {project.articleCount} articles
-            </Typography>
-          </Box>
+    try {
+      setLoading(true);
+      
+      if (editMode && selectedProjectId) {
+        await firestoreService.updateProject(selectedProjectId, currentProject);
+        setSnackbar({
+          open: true,
+          message: 'Projet mis à jour avec succès',
+          severity: 'success'
+        });
+      } else {
+        await firestoreService.createProject(currentProject);
+        setSnackbar({
+          open: true,
+          message: 'Projet créé avec succès',
+          severity: 'success'
+        });
+      }
+      
+      handleCloseDialog();
+      await loadProjects();
+      
+    } catch (error) {
+      console.error('Error saving project:', error);
+      setSnackbar({
+        open: true,
+        message: 'Erreur lors de la sauvegarde du projet',
+        severity: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-          <LinearProgress 
-            variant="determinate" 
-            value={project.status === 'completed' ? 100 : 50} 
-            color={getStatusColor(project.status)}
-          />
-        </CardContent>
+  const handleDeleteProject = async (projectId: string) => {
+    try {
+      setLoading(true);
+      await firestoreService.delete('projects', projectId);
+      setSnackbar({
+        open: true,
+        message: 'Projet supprimé avec succès',
+        severity: 'success'
+      });
+      await loadProjects();
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      setSnackbar({
+        open: true,
+        message: 'Erreur lors de la suppression du projet',
+        severity: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        <CardActions>
-          <Button 
-            size="small" 
-            color="primary" 
-            onClick={() => navigate(`/project/${project.id}`)}
-          >
-            Détails du projet
-          </Button>
-        </CardActions>
-      </Card>
-    </Grid>
-  );
-
-  const handleProjectCreated = () => {
-    setIsCreateProjectModalOpen(false);
-    // Optionnel : rafraîchir la liste des projets
+  const formatDate = (timestamp: Timestamp | undefined) => {
+    if (!timestamp) return '';
+    return new Date(timestamp.seconds * 1000).toLocaleDateString();
   };
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4 }}>
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mb: 4 
-      }}>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" component="h1">
-          {t('projects.myProjects') as string}
+          Mes Projets
         </Typography>
         <Button
           variant="contained"
-          color="primary"
           startIcon={<AddIcon />}
-          onClick={() => setIsCreateProjectModalOpen(true)}
+          onClick={() => handleOpenDialog()}
         >
-          {t('projects.createNew') as string}
+          Nouveau Projet
         </Button>
       </Box>
 
-      {projectsLoading ? (
-        <Box sx={{ width: '100%', textAlign: 'center', mt: 4 }}>
-          <Typography variant="body1">
-            Chargement de vos projets...
-          </Typography>
-        </Box>
-      ) : projects.length === 0 ? (
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          height: '50vh' 
-        }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Vous n'avez pas encore de projets
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={() => setIsCreateProjectModalOpen(true)}
-          >
-            Créer mon premier projet
-          </Button>
-        </Box>
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      {loading ? (
+        <Typography>Chargement des projets...</Typography>
       ) : (
         <Grid container spacing={3}>
-          {projects.map(renderProjectCard)}
+          {projects.map((project) => (
+            <Grid item xs={12} md={6} key={project.id}>
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Box>
+                      <Typography variant="h6">
+                        {project.name}
+                      </Typography>
+                      <Typography color="text.secondary" variant="body2">
+                        Créé le {formatDate(project.createdAt)}
+                      </Typography>
+                      <Typography color="text.secondary" variant="body2">
+                        Status: {project.status}
+                      </Typography>
+                    </Box>
+                    <Box>
+                      <IconButton onClick={() => handleOpenDialog(true, project)}>
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton 
+                        onClick={() => project.id && handleDeleteProject(project.id)} 
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Site: {project.site.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Persona: {project.persona.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Articles: {project.articleCount || 0}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
         </Grid>
       )}
 
-      <Dialog
-        open={isCreateProjectModalOpen}
-        onClose={() => setIsCreateProjectModalOpen(false)}
-        maxWidth="md"
+      <Dialog 
+        open={openDialog} 
+        onClose={handleCloseDialog}
+        maxWidth="sm"
         fullWidth
       >
-        <ProjectForm 
-          onProjectCreated={handleProjectCreated}
-          onClose={() => setIsCreateProjectModalOpen(false)}
-          mode="modal" 
-        />
+        <DialogTitle>
+          {editMode ? 'Modifier le projet' : 'Nouveau projet'}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <TextField
+              fullWidth
+              label="Nom du projet"
+              value={currentProject.name}
+              onChange={(e) => setCurrentProject(prev => ({ ...prev, name: e.target.value }))}
+              required
+              sx={{ mb: 2 }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Annuler</Button>
+          <Button 
+            onClick={handleSaveProject}
+            variant="contained"
+            disabled={loading}
+          >
+            {editMode ? 'Mettre à jour' : 'Créer'}
+          </Button>
+        </DialogActions>
       </Dialog>
-    </Container>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+      >
+        <Alert 
+          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
+          severity={snackbar.severity}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };

@@ -6,11 +6,10 @@ import { Layout } from './components/layout/Layout';
 import { Dashboard } from './components/layout/Dashboard';
 import { ContentGenerator } from './components/content/ContentGenerator';
 import { WordPressPublisher } from './components/wordpress/WordPressPublisher';
-import { PersonaManager } from './components/persona/PersonaManager';
+import { PersonasManager } from './components/personas/PersonasManager';
 import { Settings } from './components/settings/Settings';
 import { ArticlesList } from './components/articles/ArticlesList';
 import NewArticlePage from './components/articles/NewArticlePage';
-import { PersonasList } from './components/personas/PersonasList';
 import { SitesList } from './components/sites/SitesList';
 import { AuthProvider } from './components/auth/AuthProvider';
 import { ProjectsPage } from './pages/ProjectsPage'; 
@@ -66,7 +65,7 @@ function App() {
               <Route path="/projects" element={<ProjectsPage />} />
               <Route path="/generator" element={<ContentGenerator persona="default" keywords={[]} />} />
               <Route path="/publisher" element={<WordPressPublisher content="" title="" />} />
-              <Route path="/personas" element={<PersonasList />} />
+              <Route path="/personas" element={<PersonasManager />} />
               <Route path="/sites" element={<SitesList />} />
               <Route path="/articles" element={<ArticlesList />} />
               <Route path="/new-article" element={<NewArticlePage />} />

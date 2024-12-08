@@ -19,7 +19,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { firestoreService } from '../../services/firestore';
 import { useAuth } from '../auth/AuthProvider';
-import { PersonaModal } from '../personas/PersonaModal';
+import { PersonaModal } from '../../components/personas/PersonaModal';
 import { SiteModal } from '../sites/SiteModal';
 import { Project, Site, Persona } from '../../services/firestore';
 
@@ -104,12 +104,20 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     }
   };
 
-  const handlePersonaCreated = (newPersona: Persona) => {
-    setPersonas(prev => [...prev, newPersona]);
-    if (newPersona.id) {
-      setSelectedPersona(newPersona.id);
+  const handlePersonaCreated = async (personaData: Omit<Persona, "id" | "userId">) => {
+    try {
+      const newPersonaRef = await firestoreService.createPersona(personaData);
+      const newPersona = {
+        id: newPersonaRef.id,
+        userId: currentUser?.uid || '',
+        ...personaData
+      };
+      setPersonas(prev => [...prev, newPersona]);
+      setSelectedPersona(newPersonaRef.id);
+      setIsPersonaModalOpen(false);
+    } catch (error) {
+      console.error('Erreur lors de la création du persona', error);
     }
-    setIsPersonaModalOpen(false);
   };
 
   const handleSiteCreated = (newSite: Site) => {
