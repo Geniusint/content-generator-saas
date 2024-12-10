@@ -12,7 +12,7 @@ import { ArticlesList } from './components/articles/ArticlesList';
 import NewArticlePage from './components/articles/NewArticlePage';
 import { SitesList } from './components/sites/SitesList';
 import { AuthProvider } from './components/auth/AuthProvider';
-import { ProjectsPage } from './pages/ProjectsPage'; 
+import { ProjectsPage } from './components/ProjectsPage';
 import { SignInPage } from './components/auth/SignInPage';
 import { SignUpPage } from './components/auth/SignUpPage';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';

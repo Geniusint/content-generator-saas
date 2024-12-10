@@ -64,19 +64,18 @@ export interface Article {
 export interface Persona {
   id?: string;
   userId: string;
-  name: string;
-  avatar: string;
-  role: string;
+  prenom: string;
+  nom: string;
   age: number;
-  location: string;
-  language: string; // Changé de languages[] à language
-  education: string;
-  interests: string[];
-  goals: string[];
-  painPoints: string[];
-  preferredContent: string[];
-  tone: string;
-  description: string;
+  profession: string;
+  niveau_expertise: 'novice' | 'intermédiaire' | 'expert';
+  objectifs: string[];
+  defis: string[];
+  sujets_interet: string[];
+  style_langage_prefere: 'simple' | 'neutre' | 'soutenu';
+  tonalite_preferee: 'pédagogique' | 'humoristique' | 'sérieux';
+  sources_information_habituelles: string[];
+  langue: string;
 }
 
 export interface Site {
@@ -84,7 +83,10 @@ export interface Site {
   userId: string;
   name: string;
   url: string;
+  sitemap?: string;
   type: 'wordpress' | 'custom';
+  siteType: 'ecommerce' | 'blog' | 'corporate' | 'portfolio' | 'educational' | 'news';
+  targetAudience: string[];
   wpUsername?: string;
   wpAppPassword?: string;
   status: 'connected' | 'error' | 'pending';

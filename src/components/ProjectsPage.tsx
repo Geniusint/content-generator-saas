@@ -23,9 +23,10 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material';
-import { useAuth } from '../components/auth/AuthProvider';
+import { useAuth } from './auth/AuthProvider';
 import { firestoreService, Project } from '../services/firestore';
 import { Timestamp } from 'firebase/firestore';
+import { ProjectForm } from './projects/ProjectForm';
 
 const initialProjectState: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'articleCount'> = {
   name: '',
@@ -103,48 +104,14 @@ export const ProjectsPage = () => {
     setSelectedProjectId(null);
   };
 
-  const handleSaveProject = async () => {
-    if (!currentUser) {
-      setSnackbar({
-        open: true,
-        message: 'Vous devez être connecté pour créer un projet',
-        severity: 'error'
-      });
-      return;
-    }
-
-    try {
-      setLoading(true);
-      
-      if (editMode && selectedProjectId) {
-        await firestoreService.updateProject(selectedProjectId, currentProject);
-        setSnackbar({
-          open: true,
-          message: 'Projet mis à jour avec succès',
-          severity: 'success'
-        });
-      } else {
-        await firestoreService.createProject(currentProject);
-        setSnackbar({
-          open: true,
-          message: 'Projet créé avec succès',
-          severity: 'success'
-        });
-      }
-      
-      handleCloseDialog();
-      await loadProjects();
-      
-    } catch (error) {
-      console.error('Error saving project:', error);
-      setSnackbar({
-        open: true,
-        message: 'Erreur lors de la sauvegarde du projet',
-        severity: 'error'
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleProjectCreated = async () => {
+    await loadProjects();
+    handleCloseDialog();
+    setSnackbar({
+      open: true,
+      message: 'Projet créé avec succès',
+      severity: 'success'
+    });
   };
 
   const handleDeleteProject = async (projectId: string) => {
@@ -235,7 +202,7 @@ export const ProjectsPage = () => {
                       Persona: {project.persona.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Articles: {project.articleCount || 0}
+                      Articles générés: {project.articleCount || 0}
                     </Typography>
                   </Box>
                 </CardContent>
@@ -245,48 +212,28 @@ export const ProjectsPage = () => {
         </Grid>
       )}
 
-      <Dialog 
-        open={openDialog} 
-        onClose={handleCloseDialog}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
           {editMode ? 'Modifier le projet' : 'Nouveau projet'}
         </DialogTitle>
         <DialogContent>
-          <Box sx={{ pt: 2 }}>
-            <TextField
-              fullWidth
-              label="Nom du projet"
-              value={currentProject.name}
-              onChange={(e) => setCurrentProject(prev => ({ ...prev, name: e.target.value }))}
-              required
-              sx={{ mb: 2 }}
-            />
-          </Box>
+          <ProjectForm
+            project={currentProject}
+            projectId={selectedProjectId}
+            onSuccess={handleProjectCreated}
+            onCancel={handleCloseDialog}
+            editMode={editMode}
+            mode="modal"
+          />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Annuler</Button>
-          <Button 
-            onClick={handleSaveProject}
-            variant="contained"
-            disabled={loading}
-          >
-            {editMode ? 'Mettre à jour' : 'Créer'}
-          </Button>
-        </DialogActions>
       </Dialog>
 
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
-        <Alert 
-          onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} 
-          severity={snackbar.severity}
-        >
+        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

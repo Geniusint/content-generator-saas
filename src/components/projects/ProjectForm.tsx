@@ -24,19 +24,25 @@ import { SiteModal } from '../sites/SiteModal';
 import { Project, Site, Persona } from '../../services/firestore';
 
 interface ProjectFormProps {
+  project?: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'articleCount'>;
+  projectId?: string | null;
   persona?: string;
   keywords?: string[];
   mode?: 'page' | 'modal';
-  onProjectCreated?: () => void;
-  onClose?: () => void;
+  onSuccess?: () => Promise<void>;
+  onCancel?: () => void;
+  editMode?: boolean;
 }
 
 export const ProjectForm: React.FC<ProjectFormProps> = ({
+  project,
+  projectId,
   persona = '',
   keywords = [],
   mode = 'page',
-  onProjectCreated,
-  onClose
+  onSuccess,
+  onCancel,
+  editMode = false
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -48,6 +54,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isPersonaModalOpen, setIsPersonaModalOpen] = useState(false);
   const [isSiteModalOpen, setIsSiteModalOpen] = useState(false);
+  const [errors, setErrors] = useState({
+    projectName: false,
+    site: false,
+    persona: false
+  });
 
   // États pour les listes déroulantes
   const [sites, setSites] = useState<Site[]>([]);
@@ -75,8 +86,23 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const handleCreateProject = async () => {
     if (!currentUser) return;
 
+    // Validate form
+    const newErrors = {
+      projectName: !projectName.trim(),
+      site: !selectedSite,
+      persona: !selectedPersona
+    };
+    
+    setErrors(newErrors);
+
+    // If there are any errors, don't submit
+    if (Object.values(newErrors).some(error => error)) {
+      return;
+    }
+
     setIsLoading(true);
     try {
+      const selectedPersonaData = personas.find(p => p.id === selectedPersona);
       const projectData: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'articleCount'> = {
         name: projectName,
         site: { 
@@ -85,15 +111,15 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         },
         persona: { 
           id: selectedPersona, 
-          name: personas.find(p => p.id === selectedPersona)?.name || '' 
+          name: selectedPersonaData ? `${selectedPersonaData.prenom} ${selectedPersonaData.nom}` : '' 
         },
         status: 'draft',
       };
 
       const projectRef = await firestoreService.createProject(projectData);
       
-      if (mode === 'modal' && onProjectCreated) {
-        onProjectCreated();
+      if (mode === 'modal' && onSuccess) {
+        await onSuccess();
       } else {
         navigate(`/projects/${projectRef.id}`);
       }
@@ -143,6 +169,9 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         fullWidth
         value={projectName}
         onChange={(e) => setProjectName(e.target.value)}
+        required
+        error={errors.projectName}
+        helperText={errors.projectName ? "Le nom du projet est requis" : ""}
       />
 
       <Grid container spacing={2}>
@@ -154,6 +183,8 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             value={selectedSite}
             onChange={(e) => setSelectedSite(e.target.value)}
             displayEmpty
+            required
+            error={errors.site}
           >
             <MenuItem value="" disabled>
               Sélectionner un site
@@ -187,13 +218,15 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             value={selectedPersona}
             onChange={(e) => setSelectedPersona(e.target.value)}
             displayEmpty
+            required
+            error={errors.persona}
           >
             <MenuItem value="" disabled>
               Sélectionner un persona
             </MenuItem>
             {personas.map((persona) => (
               <MenuItem key={persona.id} value={persona.id}>
-                {persona.name}
+                {`${persona.prenom} ${persona.nom}`}
               </MenuItem>
             ))}
           </Select>
@@ -239,7 +272,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             {renderForm()}
           </DialogContent>
           <DialogActions sx={{ px: 3, pb: 3 }}>
-            <Button onClick={onClose}>Annuler</Button>
+            <Button onClick={onCancel}>Annuler</Button>
           </DialogActions>
         </>
       )}

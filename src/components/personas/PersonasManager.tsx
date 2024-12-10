@@ -33,54 +33,48 @@ import {
   Delete as DeleteIcon,
   Person as PersonIcon,
   Language as LanguageIcon,
+  Work as WorkIcon,
   School as EducationIcon,
-  LocationOn as LocationIcon,
-  Search as SearchIcon
+  Psychology as PsychologyIcon
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthProvider';
 import { firestoreService, Persona } from '../../services/firestore';
+import { generatePersona } from '../../services/openai';
 import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 
 const initialPersonaState: Omit<Persona, 'id' | 'userId'> = {
-  name: '',
-  avatar: '',
-  role: '',
+  prenom: '',
+  nom: '',
   age: 0,
-  location: '',
-  language: '',
-  education: '',
-  interests: [],
-  goals: [],
-  painPoints: [],
-  preferredContent: [],
-  tone: 'neutral',
-  description: ''
+  profession: '',
+  niveau_expertise: 'novice',
+  objectifs: [],
+  defis: [],
+  sujets_interet: [],
+  style_langage_prefere: 'simple',
+  tonalite_preferee: 'pédagogique',
+  sources_information_habituelles: [],
+  langue: 'fr'
 };
 
-// Liste prédéfinie des langues
-const predefinedLanguages = [
+const niveauxExpertise = ['novice', 'intermédiaire', 'expert'];
+const stylesLangage = ['simple', 'neutre', 'soutenu'];
+const tonalites = ['pédagogique', 'humoristique', 'sérieux'];
+
+const langues = [
   { code: 'fr', name: 'Français' },
   { code: 'en', name: 'Anglais' },
   { code: 'es', name: 'Espagnol' },
   { code: 'de', name: 'Allemand' },
-  { code: 'it', name: 'Italien' },
-  { code: 'pt', name: 'Portugais' },
-  { code: 'nl', name: 'Néerlandais' },
-  { code: 'ru', name: 'Russe' },
-  { code: 'ar', name: 'Arabe' },
-  { code: 'zh', name: 'Chinois' },
-  { code: 'ja', name: 'Japonais' },
-  { code: 'ko', name: 'Coréen' }
+  { code: 'it', name: 'Italien' }
 ];
 
 // Couleurs pour les différentes catégories
 const categoryColors = {
-  interests: '#e3f2fd',
-  goals: '#f3e5f5',
-  painPoints: '#ffebee',
-  language: '#e8f5e9',
-  preferredContent: '#fff3e0'
+  sujets_interet: '#e3f2fd',
+  objectifs: '#f3e5f5',
+  defis: '#ffebee'
 };
 
 const ITEM_HEIGHT = 48;
@@ -102,8 +96,16 @@ export const PersonasManager = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openAIDialog, setOpenAIDialog] = useState(false);
+  const [personaDescription, setPersonaDescription] = useState('');
   const [editMode, setEditMode] = useState(false);
-  const [currentPersona, setCurrentPersona] = useState<Omit<Persona, 'id' | 'userId'>>(initialPersonaState);
+  const [currentPersona, setCurrentPersona] = useState<Omit<Persona, 'id' | 'userId'>>({
+    ...initialPersonaState,
+    objectifs: [],
+    defis: [],
+    sujets_interet: [],
+    sources_information_habituelles: []
+  });
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [personaToDelete, setPersonaToDelete] = useState<string | null>(null);
@@ -116,9 +118,9 @@ export const PersonasManager = () => {
   // Filtres
   const [filters, setFilters] = useState({
     searchTerm: '',
-    role: 'all',
-    language: 'all',
-    ageRange: 'all'
+    profession: 'all',
+    langue: 'all',
+    niveau_expertise: 'all'
   });
 
   useEffect(() => {
@@ -137,30 +139,24 @@ export const PersonasManager = () => {
     // Filtre par terme de recherche
     if (filters.searchTerm) {
       filtered = filtered.filter(persona => 
-        persona.name.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-        persona.role.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
-        persona.description.toLowerCase().includes(filters.searchTerm.toLowerCase())
+        `${persona.prenom} ${persona.nom}`.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
+        persona.profession.toLowerCase().includes(filters.searchTerm.toLowerCase())
       );
     }
 
-    // Filtre par rôle
-    if (filters.role !== 'all') {
-      filtered = filtered.filter(persona => persona.role === filters.role);
+    // Filtre par profession
+    if (filters.profession !== 'all') {
+      filtered = filtered.filter(persona => persona.profession === filters.profession);
     }
 
     // Filtre par langue
-    if (filters.language !== 'all') {
-      filtered = filtered.filter(persona => 
-        persona.language === filters.language
-      );
+    if (filters.langue !== 'all') {
+      filtered = filtered.filter(persona => persona.langue === filters.langue);
     }
 
-    // Filtre par tranche d'âge
-    if (filters.ageRange !== 'all') {
-      const [min, max] = filters.ageRange.split('-').map(Number);
-      filtered = filtered.filter(persona => 
-        persona.age >= min && persona.age <= (max || Infinity)
-      );
+    // Filtre par niveau d'expertise
+    if (filters.niveau_expertise !== 'all') {
+      filtered = filtered.filter(persona => persona.niveau_expertise === filters.niveau_expertise);
     }
 
     setFilteredPersonas(filtered);
@@ -188,23 +184,28 @@ export const PersonasManager = () => {
   const handleOpenDialog = (edit: boolean = false, persona?: Persona) => {
     if (edit && persona && persona.id) {
       setCurrentPersona({
-        name: persona.name,
-        avatar: persona.avatar,
-        role: persona.role,
+        prenom: persona.prenom,
+        nom: persona.nom,
         age: persona.age,
-        location: persona.location,
-        language: persona.language,
-        education: persona.education,
-        interests: persona.interests,
-        goals: persona.goals,
-        painPoints: persona.painPoints,
-        preferredContent: persona.preferredContent,
-        tone: persona.tone,
-        description: persona.description
+        profession: persona.profession,
+        niveau_expertise: persona.niveau_expertise,
+        objectifs: persona.objectifs || [],
+        defis: persona.defis || [],
+        sujets_interet: persona.sujets_interet || [],
+        style_langage_prefere: persona.style_langage_prefere,
+        tonalite_preferee: persona.tonalite_preferee,
+        sources_information_habituelles: persona.sources_information_habituelles || [],
+        langue: persona.langue
       });
       setSelectedPersonaId(persona.id);
     } else {
-      setCurrentPersona(initialPersonaState);
+      setCurrentPersona({
+        ...initialPersonaState,
+        objectifs: [],
+        defis: [],
+        sujets_interet: [],
+        sources_information_habituelles: []
+      });
       setSelectedPersonaId(null);
     }
     setEditMode(edit);
@@ -214,7 +215,13 @@ export const PersonasManager = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setEditMode(false);
-    setCurrentPersona(initialPersonaState);
+    setCurrentPersona({
+      ...initialPersonaState,
+      objectifs: [],
+      defis: [],
+      sujets_interet: [],
+      sources_information_habituelles: []
+    });
     setSelectedPersonaId(null);
   };
 
@@ -255,10 +262,10 @@ export const PersonasManager = () => {
   };
 
   const validatePersona = (persona: Omit<Persona, 'id' | 'userId'>): boolean => {
-    if (!persona.name.trim()) {
+    if (!persona.prenom.trim() || !persona.nom.trim()) {
       setSnackbar({
         open: true,
-        message: 'Le nom est requis',
+        message: 'Le prénom et le nom sont requis',
         severity: 'error'
       });
       return false;
@@ -322,6 +329,41 @@ export const PersonasManager = () => {
     }
   };
 
+  const handleGeneratePersona = async () => {
+    if (!personaDescription.trim()) {
+      setSnackbar({
+        open: true,
+        message: 'Veuillez fournir une description pour générer le persona',
+        severity: 'error'
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const generatedPersona = await generatePersona(personaDescription);
+      setCurrentPersona({
+        ...generatedPersona,
+        objectifs: generatedPersona.objectifs || [],
+        defis: generatedPersona.defis || [],
+        sujets_interet: generatedPersona.sujets_interet || [],
+        sources_information_habituelles: generatedPersona.sources_information_habituelles || []
+      });
+      setOpenAIDialog(false);
+      setOpenDialog(true);
+      setPersonaDescription('');
+    } catch (error) {
+      console.error('Erreur lors de la génération du persona:', error);
+      setSnackbar({
+        open: true,
+        message: 'Erreur lors de la génération du persona',
+        severity: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleInputChange = (field: keyof Omit<Persona, 'id' | 'userId'>, value: any) => {
     setCurrentPersona(prev => ({
       ...prev,
@@ -338,11 +380,11 @@ export const PersonasManager = () => {
   };
 
   // Obtenir les valeurs uniques pour les filtres
-  const uniqueRoles = Array.from(new Set(personas.map(p => p.role))).filter(Boolean);
+  const uniqueProfessions = Array.from(new Set(personas.map(p => p.profession))).filter(Boolean);
 
   // Fonction pour obtenir le nom complet de la langue à partir du code
   const getLanguageName = (code: string): string => {
-    const language = predefinedLanguages.find(lang => lang.code === code);
+    const language = langues.find(lang => lang.code === code);
     return language ? language.name : code;
   };
 
@@ -352,13 +394,23 @@ export const PersonasManager = () => {
         <Typography variant="h4" component="h1">
           Mes Personas
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-        >
-          Nouveau Persona
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<PsychologyIcon />}
+            onClick={() => setOpenAIDialog(true)}
+            color="secondary"
+          >
+            Créer avec l'IA
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenDialog()}
+          >
+            Nouveau Persona
+          </Button>
+        </Box>
       </Box>
 
       {/* Section des filtres */}
@@ -371,22 +423,19 @@ export const PersonasManager = () => {
               variant="outlined"
               value={filters.searchTerm}
               onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-              InputProps={{
-                startAdornment: <SearchIcon sx={{ color: 'action.active', mr: 1 }} />
-              }}
             />
           </Grid>
           <Grid item xs={12} sm={3}>
             <FormControl fullWidth>
-              <InputLabel>Rôle</InputLabel>
+              <InputLabel>Profession</InputLabel>
               <Select
-                value={filters.role}
-                onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value }))}
-                input={<OutlinedInput label="Rôle" />}
+                value={filters.profession}
+                onChange={(e) => setFilters(prev => ({ ...prev, profession: e.target.value }))}
+                input={<OutlinedInput label="Profession" />}
               >
-                <MenuItem value="all">Tous les rôles</MenuItem>
-                {uniqueRoles.map((role) => (
-                  <MenuItem key={role} value={role}>{role}</MenuItem>
+                <MenuItem value="all">Toutes les professions</MenuItem>
+                {uniqueProfessions.map((profession) => (
+                  <MenuItem key={profession} value={profession}>{profession}</MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -395,12 +444,12 @@ export const PersonasManager = () => {
             <FormControl fullWidth>
               <InputLabel>Langue</InputLabel>
               <Select
-                value={filters.language}
-                onChange={(e) => setFilters(prev => ({ ...prev, language: e.target.value }))}
+                value={filters.langue}
+                onChange={(e) => setFilters(prev => ({ ...prev, langue: e.target.value }))}
                 input={<OutlinedInput label="Langue" />}
               >
                 <MenuItem value="all">Toutes les langues</MenuItem>
-                {predefinedLanguages.map((lang) => (
+                {langues.map((lang) => (
                   <MenuItem key={lang.code} value={lang.code}>{lang.name}</MenuItem>
                 ))}
               </Select>
@@ -408,17 +457,18 @@ export const PersonasManager = () => {
           </Grid>
           <Grid item xs={12} sm={3}>
             <FormControl fullWidth>
-              <InputLabel>Âge</InputLabel>
+              <InputLabel>Niveau d'expertise</InputLabel>
               <Select
-                value={filters.ageRange}
-                onChange={(e) => setFilters(prev => ({ ...prev, ageRange: e.target.value }))}
-                input={<OutlinedInput label="Âge" />}
+                value={filters.niveau_expertise}
+                onChange={(e) => setFilters(prev => ({ ...prev, niveau_expertise: e.target.value }))}
+                input={<OutlinedInput label="Niveau d'expertise" />}
               >
-                <MenuItem value="all">Tous les âges</MenuItem>
-                <MenuItem value="18-25">18-25 ans</MenuItem>
-                <MenuItem value="26-35">26-35 ans</MenuItem>
-                <MenuItem value="36-50">36-50 ans</MenuItem>
-                <MenuItem value="51">51+ ans</MenuItem>
+                <MenuItem value="all">Tous les niveaux</MenuItem>
+                {niveauxExpertise.map((niveau) => (
+                  <MenuItem key={niveau} value={niveau}>
+                    {niveau.charAt(0).toUpperCase() + niveau.slice(1)}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -441,19 +491,15 @@ export const PersonasManager = () => {
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <Avatar
-                        src={persona.avatar}
-                        alt={persona.name}
-                        sx={{ width: 60, height: 60 }}
-                      >
-                        {persona.name.charAt(0)}
+                      <Avatar sx={{ width: 60, height: 60 }}>
+                        {persona.prenom.charAt(0)}
                       </Avatar>
                       <Box>
                         <Typography variant="h6">
-                          {persona.name}
+                          {persona.prenom} {persona.nom}
                         </Typography>
                         <Typography color="text.secondary">
-                          {persona.role}, {persona.age} ans
+                          {persona.profession}, {persona.age} ans
                         </Typography>
                       </Box>
                     </Box>
@@ -473,9 +519,12 @@ export const PersonasManager = () => {
                   <List dense>
                     <ListItem>
                       <ListItemIcon>
-                        <LocationIcon />
+                        <WorkIcon />
                       </ListItemIcon>
-                      <ListItemText primary={persona.location} />
+                      <ListItemText 
+                        primary={persona.profession}
+                        secondary={`Niveau: ${persona.niveau_expertise}`}
+                      />
                     </ListItem>
                     
                     <ListItem>
@@ -483,19 +532,9 @@ export const PersonasManager = () => {
                         <LanguageIcon />
                       </ListItemIcon>
                       <Chip
-                        label={getLanguageName(persona.language)}
+                        label={getLanguageName(persona.langue)}
                         size="small"
-                        sx={{ bgcolor: categoryColors.language }}
-                      />
-                    </ListItem>
-
-                    <ListItem>
-                      <ListItemIcon>
-                        <EducationIcon />
-                      </ListItemIcon>
-                      <ListItemText 
-                        primary={persona.education}
-                        secondary="Formation"
+                        sx={{ bgcolor: categoryColors.sujets_interet }}
                       />
                     </ListItem>
                   </List>
@@ -503,15 +542,15 @@ export const PersonasManager = () => {
                   <Divider sx={{ my: 2 }} />
 
                   <Typography variant="subtitle2" gutterBottom>
-                    Centres d'intérêt
+                    Sujets d'intérêt
                   </Typography>
                   <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {persona.interests.map((interest, index) => (
+                    {(persona.sujets_interet || []).map((sujet, index) => (
                       <Chip
                         key={index}
-                        label={interest}
+                        label={sujet}
                         size="small"
-                        sx={{ bgcolor: categoryColors.interests }}
+                        sx={{ bgcolor: categoryColors.sujets_interet }}
                       />
                     ))}
                   </Box>
@@ -520,56 +559,44 @@ export const PersonasManager = () => {
                     Objectifs
                   </Typography>
                   <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {persona.goals.map((goal, index) => (
+                    {(persona.objectifs || []).map((objectif, index) => (
                       <Chip
                         key={index}
-                        label={goal}
+                        label={objectif}
                         size="small"
-                        sx={{ bgcolor: categoryColors.goals }}
+                        sx={{ bgcolor: categoryColors.objectifs }}
                       />
                     ))}
                   </Box>
 
                   <Typography variant="subtitle2" gutterBottom>
-                    Points de friction
+                    Défis
                   </Typography>
                   <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {persona.painPoints.map((point, index) => (
+                    {(persona.defis || []).map((defi, index) => (
                       <Chip
                         key={index}
-                        label={point}
+                        label={defi}
                         size="small"
-                        sx={{ bgcolor: categoryColors.painPoints }}
+                        sx={{ bgcolor: categoryColors.defis }}
                       />
                     ))}
                   </Box>
 
-                  <Typography variant="subtitle2" gutterBottom>
-                    Types de contenu préférés
-                  </Typography>
-                  <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {persona.preferredContent.map((content, index) => (
-                      <Chip
-                        key={index}
-                        label={content}
-                        size="small"
-                        sx={{ bgcolor: categoryColors.preferredContent }}
-                      />
-                    ))}
-                  </Box>
+                  <Divider sx={{ my: 2 }} />
 
                   <Typography variant="subtitle2" gutterBottom>
-                    Description
-                  </Typography>
-                  <Typography variant="body2" paragraph>
-                    {persona.description}
-                  </Typography>
-
-                  <Typography variant="subtitle2" gutterBottom>
-                    Ton de communication
+                    Style de langage préféré
                   </Typography>
                   <Typography variant="body2">
-                    {persona.tone}
+                    {persona.style_langage_prefere}
+                  </Typography>
+
+                  <Typography variant="subtitle2" gutterBottom sx={{ mt: 1 }}>
+                    Tonalité préférée
+                  </Typography>
+                  <Typography variant="body2">
+                    {persona.tonalite_preferee}
                   </Typography>
                 </CardContent>
               </Card>
@@ -578,6 +605,7 @@ export const PersonasManager = () => {
         </Grid>
       )}
 
+      {/* Dialog pour la création/édition manuelle */}
       <Dialog 
         open={openDialog} 
         onClose={handleCloseDialog}
@@ -592,18 +620,19 @@ export const PersonasManager = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Nom"
-                value={currentPersona.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                label="Prénom"
+                value={currentPersona.prenom}
+                onChange={(e) => handleInputChange('prenom', e.target.value)}
                 required
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Rôle"
-                value={currentPersona.role}
-                onChange={(e) => handleInputChange('role', e.target.value)}
+                label="Nom"
+                value={currentPersona.nom}
+                onChange={(e) => handleInputChange('nom', e.target.value)}
+                required
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -618,22 +647,38 @@ export const PersonasManager = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Localisation"
-                value={currentPersona.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
+                label="Profession"
+                value={currentPersona.profession}
+                onChange={(e) => handleInputChange('profession', e.target.value)}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Niveau d'expertise</InputLabel>
+                <Select
+                  value={currentPersona.niveau_expertise}
+                  onChange={(e) => handleInputChange('niveau_expertise', e.target.value)}
+                  label="Niveau d'expertise"
+                >
+                  {niveauxExpertise.map((niveau) => (
+                    <MenuItem key={niveau} value={niveau}>
+                      {niveau.charAt(0).toUpperCase() + niveau.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <InputLabel>Langue</InputLabel>
                 <Select
-                  value={currentPersona.language}
-                  onChange={(e) => handleInputChange('language', e.target.value)}
-                  input={<OutlinedInput label="Langue" />}
+                  value={currentPersona.langue}
+                  onChange={(e) => handleInputChange('langue', e.target.value)}
+                  label="Langue"
                 >
-                  {predefinedLanguages.map((lang) => (
-                    <MenuItem key={lang.code} value={lang.code}>
-                      {lang.name}
+                  {langues.map((langue) => (
+                    <MenuItem key={langue.code} value={langue.code}>
+                      {langue.name}
                     </MenuItem>
                   ))}
                 </Select>
@@ -642,27 +687,9 @@ export const PersonasManager = () => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Formation"
-                value={currentPersona.education}
-                onChange={(e) => handleInputChange('education', e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Centres d'intérêt (séparés par des virgules)"
-                value={currentPersona.interests.join(', ')}
-                onChange={(e) => handleArrayInputChange('interests', e.target.value)}
-                multiline
-                rows={2}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
                 label="Objectifs (séparés par des virgules)"
-                value={currentPersona.goals.join(', ')}
-                onChange={(e) => handleArrayInputChange('goals', e.target.value)}
+                value={currentPersona.objectifs.join(', ')}
+                onChange={(e) => handleArrayInputChange('objectifs', e.target.value)}
                 multiline
                 rows={2}
               />
@@ -670,9 +697,9 @@ export const PersonasManager = () => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Points de friction (séparés par des virgules)"
-                value={currentPersona.painPoints.join(', ')}
-                onChange={(e) => handleArrayInputChange('painPoints', e.target.value)}
+                label="Défis (séparés par des virgules)"
+                value={currentPersona.defis.join(', ')}
+                onChange={(e) => handleArrayInputChange('defis', e.target.value)}
                 multiline
                 rows={2}
               />
@@ -680,29 +707,53 @@ export const PersonasManager = () => {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Types de contenu préférés (séparés par des virgules)"
-                value={currentPersona.preferredContent.join(', ')}
-                onChange={(e) => handleArrayInputChange('preferredContent', e.target.value)}
+                label="Sujets d'intérêt (séparés par des virgules)"
+                value={currentPersona.sujets_interet.join(', ')}
+                onChange={(e) => handleArrayInputChange('sujets_interet', e.target.value)}
                 multiline
                 rows={2}
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Description"
-                value={currentPersona.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                multiline
-                rows={3}
-              />
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Style de langage préféré</InputLabel>
+                <Select
+                  value={currentPersona.style_langage_prefere}
+                  onChange={(e) => handleInputChange('style_langage_prefere', e.target.value)}
+                  label="Style de langage préféré"
+                >
+                  {stylesLangage.map((style) => (
+                    <MenuItem key={style} value={style}>
+                      {style.charAt(0).toUpperCase() + style.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Tonalité préférée</InputLabel>
+                <Select
+                  value={currentPersona.tonalite_preferee}
+                  onChange={(e) => handleInputChange('tonalite_preferee', e.target.value)}
+                  label="Tonalité préférée"
+                >
+                  {tonalites.map((ton) => (
+                    <MenuItem key={ton} value={ton}>
+                      {ton.charAt(0).toUpperCase() + ton.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Ton de communication"
-                value={currentPersona.tone}
-                onChange={(e) => handleInputChange('tone', e.target.value)}
+                label="Sources d'information habituelles (séparées par des virgules)"
+                value={currentPersona.sources_information_habituelles.join(', ')}
+                onChange={(e) => handleArrayInputChange('sources_information_habituelles', e.target.value)}
+                multiline
+                rows={2}
               />
             </Grid>
           </Grid>
@@ -719,6 +770,44 @@ export const PersonasManager = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Dialog pour la génération IA */}
+      <Dialog
+        open={openAIDialog}
+        onClose={() => setOpenAIDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Créer un persona avec l'IA
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Décrivez le type de persona que vous souhaitez créer. Par exemple : "Un jeune professionnel du marketing digital qui cherche à se former sur l'intelligence artificielle"
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label="Description du persona"
+            value={personaDescription}
+            onChange={(e) => setPersonaDescription(e.target.value)}
+            placeholder="Décrivez le persona que vous souhaitez créer..."
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAIDialog(false)}>Annuler</Button>
+          <Button
+            onClick={handleGeneratePersona}
+            variant="contained"
+            disabled={loading}
+            startIcon={<PsychologyIcon />}
+          >
+            Générer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de confirmation de suppression */}
       <Dialog
         open={deleteDialogOpen}
         onClose={handleCancelDelete}

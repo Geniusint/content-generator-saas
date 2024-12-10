@@ -33,6 +33,8 @@ import {
   Link as LinkIcon,
   Search as SearchIcon,
   FilterAlt as FilterIcon,
+  Category as CategoryIcon,
+  Group as GroupIcon
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthProvider';
@@ -48,9 +50,17 @@ type ChipColor = 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warni
 const COLORS: ChipColor[] = ['primary', 'secondary', 'error', 'info', 'success', 'warning'];
 
 const getCategoryColor = (category: string): ChipColor => {
-  // Utiliser une somme simple des codes de caractères pour générer un index
   const sum = category.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return COLORS[sum % COLORS.length];
+};
+
+const SITE_TYPE_LABELS: Record<string, string> = {
+  'ecommerce': 'E-commerce',
+  'blog': 'Blog',
+  'corporate': 'Site d\'entreprise',
+  'portfolio': 'Portfolio',
+  'educational': 'Site éducatif',
+  'news': 'Site d\'actualités'
 };
 
 export const SitesList = () => {
@@ -66,6 +76,7 @@ export const SitesList = () => {
   // États pour les filtres
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
+  const [selectedSiteType, setSelectedSiteType] = useState<string>('all');
 
   const fetchSites = async () => {
     if (!currentUser) return;
@@ -93,8 +104,9 @@ export const SitesList = () => {
   const filteredSites = sites.filter(site => {
     const matchesSearch = site.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = selectedType === 'all' || site.type === selectedType;
+    const matchesSiteType = selectedSiteType === 'all' || site.siteType === selectedSiteType;
     
-    return matchesSearch && matchesType;
+    return matchesSearch && matchesType && matchesSiteType;
   });
 
   const handleOpenDialog = () => {
@@ -220,6 +232,31 @@ export const SitesList = () => {
               <MenuItem value="custom">Personnalisé</MenuItem>
             </Select>
           </FormControl>
+
+          <FormControl 
+            size="small" 
+            sx={{ 
+              minWidth: 200,
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'background.paper',
+              }
+            }}
+          >
+            <InputLabel>Type de contenu</InputLabel>
+            <Select
+              value={selectedSiteType}
+              onChange={(e) => setSelectedSiteType(e.target.value)}
+              label="Type de contenu"
+            >
+              <MenuItem value="all">Tous les contenus</MenuItem>
+              <MenuItem value="ecommerce">E-commerce</MenuItem>
+              <MenuItem value="blog">Blog</MenuItem>
+              <MenuItem value="corporate">Site d'entreprise</MenuItem>
+              <MenuItem value="portfolio">Portfolio</MenuItem>
+              <MenuItem value="educational">Site éducatif</MenuItem>
+              <MenuItem value="news">Site d'actualités</MenuItem>
+            </Select>
+          </FormControl>
         </Box>
       </Paper>
 
@@ -284,9 +321,13 @@ export const SitesList = () => {
                   </Box>
 
                   <Box sx={{ mb: 2 }}>
-                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <LinkIcon fontSize="small" />
                       {site.url || 'URL non définie'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <CategoryIcon fontSize="small" />
+                      {SITE_TYPE_LABELS[site.siteType] || site.siteType}
                     </Typography>
                   </Box>
 
@@ -294,6 +335,27 @@ export const SitesList = () => {
                     <Typography variant="body2" color="text.secondary">
                       {site.articlesCount} {site.articlesCount <= 1 ? 'article publié' : 'articles publiés'}
                     </Typography>
+
+                    {site.targetAudience?.length > 0 && (
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1, mb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, width: '100%' }}>
+                          <GroupIcon fontSize="small" color="action" />
+                          <Typography variant="body2" color="text.secondary">
+                            Public cible:
+                          </Typography>
+                        </Box>
+                        {site.targetAudience.map((audience, index) => (
+                          <Chip 
+                            key={index}
+                            label={audience}
+                            size="small"
+                            color="info"
+                            variant="outlined"
+                          />
+                        ))}
+                      </Box>
+                    )}
+
                     {site.categories?.length > 0 && (
                       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
                         {site.categories.map((category, index) => (

@@ -77,6 +77,7 @@ export const ContentGenerator: React.FC<ContentGeneratorProps> = ({
 
     setIsLoading(true);
     try {
+      const selectedPersonaData = personas.find(p => p.id === selectedPersona);
       const projectData: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'articleCount'> = {
         name: projectName,
         site: { 
@@ -85,7 +86,7 @@ export const ContentGenerator: React.FC<ContentGeneratorProps> = ({
         },
         persona: { 
           id: selectedPersona, 
-          name: personas.find(p => p.id === selectedPersona)?.name || '' 
+          name: selectedPersonaData ? `${selectedPersonaData.prenom} ${selectedPersonaData.nom}` : '' 
         },
         status: 'draft',
       };
@@ -193,7 +194,7 @@ export const ContentGenerator: React.FC<ContentGeneratorProps> = ({
             </MenuItem>
             {personas.map((persona) => (
               <MenuItem key={persona.id} value={persona.id}>
-                {persona.name}
+                {`${persona.prenom} ${persona.nom}`}
               </MenuItem>
             ))}
           </Select>
