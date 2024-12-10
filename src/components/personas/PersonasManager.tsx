@@ -25,7 +25,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  OutlinedInput
+  OutlinedInput,
+  CircularProgress
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -70,7 +71,6 @@ const langues = [
   { code: 'it', name: 'Italien' }
 ];
 
-// Couleurs pour les différentes catégories
 const categoryColors = {
   sujets_interet: '#e3f2fd',
   objectifs: '#f3e5f5',
@@ -109,13 +109,12 @@ export const PersonasManager = () => {
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [personaToDelete, setPersonaToDelete] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState<{open: boolean; message: string; severity: 'success' | 'error'}>({
+  const [snackbar, setSnackbar] = useState<{open: boolean; message: string; severity: 'success' | 'error' | 'info'}>({
     open: false,
     message: '',
     severity: 'success'
   });
-
-  // Filtres
+  const [isGenerating, setIsGenerating] = useState(false);
   const [filters, setFilters] = useState({
     searchTerm: '',
     profession: 'all',
@@ -136,7 +135,6 @@ export const PersonasManager = () => {
   const applyFilters = () => {
     let filtered = [...personas];
 
-    // Filtre par terme de recherche
     if (filters.searchTerm) {
       filtered = filtered.filter(persona => 
         `${persona.prenom} ${persona.nom}`.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
@@ -144,17 +142,14 @@ export const PersonasManager = () => {
       );
     }
 
-    // Filtre par profession
     if (filters.profession !== 'all') {
       filtered = filtered.filter(persona => persona.profession === filters.profession);
     }
 
-    // Filtre par langue
     if (filters.langue !== 'all') {
       filtered = filtered.filter(persona => persona.langue === filters.langue);
     }
 
-    // Filtre par niveau d'expertise
     if (filters.niveau_expertise !== 'all') {
       filtered = filtered.filter(persona => persona.niveau_expertise === filters.niveau_expertise);
     }
@@ -339,19 +334,25 @@ export const PersonasManager = () => {
       return;
     }
 
+    const description = personaDescription;
+    setOpenAIDialog(false);
+    setPersonaDescription('');
+    setIsGenerating(true);
+    setSnackbar({
+      open: true,
+      message: 'Génération du persona en cours...',
+      severity: 'info'
+    });
+
     try {
-      setLoading(true);
-      const generatedPersona = await generatePersona(personaDescription);
-      setCurrentPersona({
-        ...generatedPersona,
-        objectifs: generatedPersona.objectifs || [],
-        defis: generatedPersona.defis || [],
-        sujets_interet: generatedPersona.sujets_interet || [],
-        sources_information_habituelles: generatedPersona.sources_information_habituelles || []
+      const generatedPersona = await generatePersona(description);
+      await firestoreService.createPersona(generatedPersona);
+      setSnackbar({
+        open: true,
+        message: 'Persona généré et sauvegardé avec succès',
+        severity: 'success'
       });
-      setOpenAIDialog(false);
-      setOpenDialog(true);
-      setPersonaDescription('');
+      await loadPersonas();
     } catch (error) {
       console.error('Erreur lors de la génération du persona:', error);
       setSnackbar({
@@ -360,7 +361,7 @@ export const PersonasManager = () => {
         severity: 'error'
       });
     } finally {
-      setLoading(false);
+      setIsGenerating(false);
     }
   };
 
@@ -379,10 +380,8 @@ export const PersonasManager = () => {
     }));
   };
 
-  // Obtenir les valeurs uniques pour les filtres
   const uniqueProfessions = Array.from(new Set(personas.map(p => p.profession))).filter(Boolean);
 
-  // Fonction pour obtenir le nom complet de la langue à partir du code
   const getLanguageName = (code: string): string => {
     const language = langues.find(lang => lang.code === code);
     return language ? language.name : code;
@@ -397,11 +396,12 @@ export const PersonasManager = () => {
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
             variant="contained"
-            startIcon={<PsychologyIcon />}
+            startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <PsychologyIcon />}
             onClick={() => setOpenAIDialog(true)}
             color="secondary"
+            disabled={isGenerating}
           >
-            Créer avec l'IA
+            {isGenerating ? 'Génération en cours...' : 'Créer avec l\'IA'}
           </Button>
           <Button
             variant="contained"
@@ -413,7 +413,6 @@ export const PersonasManager = () => {
         </Box>
       </Box>
 
-      {/* Section des filtres */}
       <Box sx={{ mb: 4, p: 2, bgcolor: '#f5f5f5', borderRadius: 1 }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={3}>
@@ -605,7 +604,6 @@ export const PersonasManager = () => {
         </Grid>
       )}
 
-      {/* Dialog pour la création/édition manuelle */}
       <Dialog 
         open={openDialog} 
         onClose={handleCloseDialog}
@@ -770,7 +768,6 @@ export const PersonasManager = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Dialog pour la génération IA */}
       <Dialog
         open={openAIDialog}
         onClose={() => setOpenAIDialog(false)}
@@ -799,15 +796,14 @@ export const PersonasManager = () => {
           <Button
             onClick={handleGeneratePersona}
             variant="contained"
-            disabled={loading}
-            startIcon={<PsychologyIcon />}
+            disabled={loading || isGenerating}
+            startIcon={isGenerating ? <CircularProgress size={20} color="inherit" /> : <PsychologyIcon />}
           >
-            Générer
+            {isGenerating ? 'Génération...' : 'Générer'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Dialog de confirmation de suppression */}
       <Dialog
         open={deleteDialogOpen}
         onClose={handleCancelDelete}
