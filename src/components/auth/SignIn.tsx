@@ -40,7 +40,10 @@ export const SignIn = () => {
       await signInWithEmailAndPassword(auth, email, password);
       navigate('/');
     } catch (err: any) {
-      setError(err.message);
+      setError("Oops! Identifiants incorrects. Veuillez réessayer.");
+      setTimeout(() => {
+        setError(null);
+      }, 10000);
     } finally {
       setLoading(false);
     }
@@ -55,7 +58,10 @@ export const SignIn = () => {
       await signInWithPopup(auth, provider);
       navigate('/');
     } catch (err: any) {
-      setError(err.message);
+      setError("Oops! Impossible de se connecter avec Google. Veuillez réessayer.");
+      setTimeout(() => {
+        setError(null);
+      }, 10000);
     } finally {
       setLoading(false);
     }
