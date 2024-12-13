@@ -44,12 +44,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
   const drawerWidth = isSmallScreen ? MINI_DRAWER_WIDTH : (isMediumScreen ? MINI_DRAWER_WIDTH : FULL_DRAWER_WIDTH);
 
   const menuItems = [
-    { text: t('menu.dashboard') as string, icon: <DashboardIcon />, path: '/' },
-    { text: t('menu.projects') as string, icon: <ProjectIcon />, path: '/projects' },
-    { text: t('menu.articles') as string, icon: <ArticleIcon />, path: '/articles' },
-    { text: t('menu.personas') as string, icon: <PersonaIcon />, path: '/personas' },
-    { text: t('menu.sites') as string, icon: <SitesIcon />, path: '/sites' },
-    { text: t('menu.settings') as string, icon: <SettingsIcon />, path: '/settings' },
+    { text: t('menu.dashboard'), icon: <DashboardIcon />, path: '/' },
+    { text: t('menu.projects'), icon: <ProjectIcon />, path: '/projects' },
+    { text: t('menu.articles'), icon: <ArticleIcon />, path: '/articles' },
+    { text: t('menu.personas'), icon: <PersonaIcon />, path: '/personas' },
+    { text: t('menu.sites'), icon: <SitesIcon />, path: '/sites' },
+    { text: t('menu.settings'), icon: <SettingsIcon />, path: '/settings' },
   ];
 
   const drawer = (

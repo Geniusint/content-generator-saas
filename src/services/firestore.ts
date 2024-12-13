@@ -107,6 +107,29 @@ export interface UserSettings {
     username: string;
     appPassword: string;
   };
+  billing?: {
+    companyName?: string;
+    billingAddress?: string;
+    vatNumber?: string;
+    paymentMethod?: 'creditCard' | 'paypal' | 'bankTransfer' | '' | undefined;
+    creditCard?: {
+      cardNumber?: string;
+      expiryDate?: string;
+      cvv?: string;
+    };
+    paypalEmail?: string;
+    bankDetails?: {
+      accountHolderName?: string;
+      iban?: string;
+      bic?: string;
+    };
+    firstName?: string;
+    lastName?: string;
+    address?: string;
+    postalCode?: string;
+    city?: string;
+    country?: string;
+  };
 }
 
 // Types personnalisés pour les erreurs Firebase

@@ -1,169 +1,95 @@
 {
-  "translation": {
-    "menu": {
-      "dashboard": "Dashboard",
-      "projects": "My Projects",
-      "newProject": "Create Project",
-      "archivedProjects": "Archived Projects",
-      "articles": "My Articles",
-      "personas": "My Personas",
-      "newPersona": "Create Persona",
-      "sites": "My Sites",
-      "settings": "Settings"
+  "appTitle": "Content Generator SaaS",
+  "menu": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "personas": "Personas",
+    "articles": "Articles",
+    "settings": "Settings",
+    "sites": "Sites"
+  },
+  "dashboard": {
+    "welcome": "Welcome to the dashboard!",
+    "createNewProject": "New Project",
+    "stats": {
+      "totalProjects": "Total Projects",
+      "activeProjects": "Active Projects",
+      "completedProjects": "Completed Projects",
+      "publishedArticles": "Published Articles",
+      "monthlyGrowth": "+{{growth}}% this month",
+      "draftCount": "{{count}} drafts"
     },
-    "sections": {
-      "projects": "MY PROJECTS",
-      "articles": "MY ARTICLES",
-      "personas": "MY PERSONAS"
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "published": "Published",
+      "draft": "Draft",
+      "scheduled": "Scheduled"
     },
-    "dashboard": {
-      "title": "Dashboard",
-      "welcome": "Welcome to your dashboard",
-      "stats": {
-        "totalProjects": "Total Projects",
-        "activeProjects": "Active Projects",
-        "completedProjects": "Completed Projects",
-        "totalArticles": "Total Articles",
-        "publishedArticles": "Published Articles",
-        "draftArticles": "Draft Articles"
-      },
-      "recentActivity": "Recent Activity",
-      "quickActions": "Quick Actions",
-      "createNewProject": "Create New Project",
-      "createNewArticle": "Create New Article",
-      "viewAllProjects": "View All Projects"
+    "recentProjects": "Recent Projects",
+    "recentArticles": "Recent Articles",
+    "viewAll": "View all",
+    "articleCount": "{{count}} articles",
+    "lastUpdate": "Updated on {{date}}"
+  },
+  "articles": {
+    "myArticles": "My Articles",
+    "newArticle": "New Article",
+    "createNewArticle": "Create New Article",
+    "selectProject": "Select Project",
+    "title": "Title",
+    "content": "Content",
+    "create": "Create",
+    "search": "Search...",
+    "status": {
+      "label": "Status",
+      "all": "All",
+      "published": "Published",
+      "draft": "Draft",
+      "scheduled": "Scheduled"
     },
-    "projects": {
-      "title": "Project Management",
-      "createNew": "Create New Project",
-      "filter": "Filter Projects",
-      "search": "Search Projects",
-      "status": {
-        "active": "Active",
-        "completed": "Completed",
-        "archived": "Archived",
-        "draft": "Draft"
-      },
-      "sort": {
-        "newest": "Newest",
-        "oldest": "Oldest",
-        "nameAZ": "Name (A-Z)",
-        "nameZA": "Name (Z-A)"
-      },
-      "fields": {
-        "name": "Project Name",
-        "description": "Description",
-        "status": "Status",
-        "createdAt": "Created At",
-        "updatedAt": "Updated At",
-        "deadline": "Deadline"
-      }
-    },
-    "articles": {
-      "title": "Article Management",
-      "createNew": "Create New Article",
-      "filter": "Filter Articles",
-      "search": "Search Articles",
-      "generate": "Generate Content",
-      "publish": "Publish",
-      "save": "Save",
-      "preview": "Preview",
-      "status": {
-        "published": "Published",
-        "draft": "Draft",
-        "scheduled": "Scheduled",
-        "archived": "Archived"
-      },
-      "fields": {
-        "title": "Title",
-        "content": "Content",
-        "keywords": "Keywords",
-        "category": "Category",
-        "author": "Author",
-        "publishDate": "Publish Date"
-      }
-    },
-    "personas": {
-      "title": "Persona Management",
-      "createNew": "Create New Persona",
-      "edit": "Edit Persona",
-      "delete": "Delete",
-      "fields": {
-        "name": "Name",
-        "description": "Description",
-        "tone": "Tone of Voice",
-        "style": "Writing Style",
-        "audience": "Target Audience"
-      }
-    },
-    "sites": {
-      "title": "My Sites",
-      "newSite": "New Site",
-      "editSite": "Edit Site",
-      "deleteSite": "Delete Site",
-      "siteName": "Site Name",
-      "siteUrl": "Site URL",
-      "siteType": "Site Type",
-      "apiKey": "API Key",
-      "categories": "Categories",
-      "autoPublish": "Auto Publish",
-      "lastSync": "Last Sync",
-      "articlesCount": "Published Articles",
-      "status": {
-        "connected": "Connected",
-        "error": "Error",
-        "pending": "Pending"
-      },
-      "type": {
-        "wordpress": "WordPress",
-        "custom": "Custom"
-      },
-      "actions": {
-        "sync": "Sync",
-        "settings": "API Settings"
-      },
-      "errors": {
-        "connection": "Connection error. Please check your credentials."
-      }
-    },
-    "settings": {
-      "title": "Settings",
-      "language": "Language",
-      "chooseLanguage": "Choose Language",
-      "theme": {
-        "title": "Theme",
-        "light": "Light",
-        "dark": "Dark",
-        "system": "System"
-      },
-      "account": {
-        "title": "Account",
-        "profile": "Profile",
-        "preferences": "Preferences",
-        "notifications": "Notifications",
-        "security": "Security"
-      },
-      "api": {
-        "title": "API Configuration",
-        "openai": "OpenAI API",
-        "wordpress": "WordPress API"
-      }
-    },
-    "common": {
-      "save": "Save",
-      "cancel": "Cancel",
-      "delete": "Delete",
-      "edit": "Edit",
-      "create": "Create",
-      "search": "Search",
-      "filter": "Filter",
-      "sort": "Sort",
-      "loading": "Loading...",
-      "noResults": "No Results",
-      "error": "Error",
-      "success": "Success",
-      "confirm": "Confirm",
-      "actions": "Actions"
-    }
+    "project": "Project",
+    "allProjects": "All projects",
+    "wordCount": "{{count}} words",
+    "projectLabel": "Project",
+    "personaLabel": "Persona",
+    "publishedOn": "Published on",
+    "scheduledFor": "Scheduled for",
+    "edit": "Edit",
+    "preview": "Preview",
+    "publish": "Publish",
+    "delete": "Delete",
+    "errorLoading": "Error loading articles",
+    "errorCreating": "Error creating article"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "chooseLanguage": "Choose Language",
+    "settingsSaved": "Settings saved successfully!",
+    "billingInformation": "Billing Information",
+    "companyName": "Company Name",
+    "billingAddress": "Billing Address",
+    "vatNumber": "VAT Number",
+    "paymentMethod": "Payment Method",
+    "creditCard": "Credit Card",
+    "paypal": "PayPal",
+    "bankTransfer": "Bank Transfer",
+    "creditCardNumber": "Credit Card Number",
+    "creditCardExpiry": "Credit Card Expiry",
+    "creditCardCvv": "Credit Card CVV",
+    "paypalEmail": "PayPal Email",
+    "bankAccountHolder": "Bank Account Holder",
+    "bankIban": "Bank IBAN",
+    "bankBic": "Bank BIC",
+    "saveSettings": "Save Settings",
+    "userPreferences": "User Preferences",
+    "personalInformation": "Personal Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "address": "Address",
+    "postalCode": "Postal Code",
+    "city": "City",
+    "country": "Country"
   }
 }

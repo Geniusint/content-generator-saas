@@ -71,14 +71,14 @@ export const ArticlesList = () => {
 
         setArticles(articlesData);
       } catch (error) {
-        console.error('Erreur lors de la récupération des articles:', error);
+        console.error(t('articles.errorLoading'), error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchArticles();
-  }, [currentUser]);
+  }, [currentUser, t]);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>, articleId: string) => {
     setAnchorEl(event.currentTarget);
@@ -128,6 +128,19 @@ export const ArticlesList = () => {
     }
   };
 
+  const getStatusLabel = (status: 'published' | 'draft' | 'scheduled'): string => {
+    switch (status) {
+      case 'published':
+        return t('articles.status.published');
+      case 'draft':
+        return t('articles.status.draft');
+      case 'scheduled':
+        return t('articles.status.scheduled');
+      default:
+        return status;
+    }
+  };
+
   // Filtrer les articles
   const filteredArticles = articles.filter(article => {
     const matchesStatus = statusFilter === 'all' || article.status === statusFilter;
@@ -142,7 +155,7 @@ export const ArticlesList = () => {
       {/* En-tête */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" component="h1">
-          Mes Articles
+          {t('articles.myArticles')}
         </Typography>
         <Button
           variant="contained"
@@ -150,7 +163,7 @@ export const ArticlesList = () => {
           component={Link}
           to="/new-article"
         >
-          Nouvel Article
+          {t('articles.newArticle')}
         </Button>
       </Box>
 
@@ -161,7 +174,7 @@ export const ArticlesList = () => {
             <TextField
               fullWidth
               variant="outlined"
-              placeholder="Rechercher..."
+              placeholder={t('articles.search')}
               value={searchQuery}
               onChange={handleSearchChange}
               InputProps={{
@@ -175,31 +188,29 @@ export const ArticlesList = () => {
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
-              <InputLabel>Statut</InputLabel>
+              <InputLabel>{t('articles.status.label')}</InputLabel>
               <Select
                 value={statusFilter}
-                label="Statut"
+                label={t('articles.status.label')}
                 onChange={handleStatusFilterChange}
               >
-                <MenuItem value="all">Tous</MenuItem>
-                <MenuItem value="published">Publiés</MenuItem>
-                <MenuItem value="draft">Brouillons</MenuItem>
-                <MenuItem value="scheduled">Programmés</MenuItem>
+                <MenuItem value="all">{t('articles.status.all')}</MenuItem>
+                <MenuItem value="published">{t('articles.status.published')}</MenuItem>
+                <MenuItem value="draft">{t('articles.status.draft')}</MenuItem>
+                <MenuItem value="scheduled">{t('articles.status.scheduled')}</MenuItem>
               </Select>
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={4}>
             <FormControl fullWidth>
-              <InputLabel>Projet</InputLabel>
+              <InputLabel>{t('articles.project')}</InputLabel>
               <Select
                 value={projectFilter}
-                label="Projet"
+                label={t('articles.project')}
                 onChange={handleProjectFilterChange}
               >
-                <MenuItem value="all">Tous</MenuItem>
-                <MenuItem value="Blog Tech Innovation">Blog Tech Innovation</MenuItem>
-                <MenuItem value="Guide Marketing Digital">Guide Marketing Digital</MenuItem>
-                <MenuItem value="Newsletter Hebdomadaire">Newsletter Hebdomadaire</MenuItem>
+                <MenuItem value="all">{t('articles.allProjects')}</MenuItem>
+                {/* Les projets devraient être chargés dynamiquement */}
               </Select>
             </FormControl>
           </Grid>
@@ -231,36 +242,38 @@ export const ArticlesList = () => {
                 <Box sx={{ mb: 2 }}>
                   <Chip
                     icon={getStatusIcon(article.status)}
-                    label={article.status}
+                    label={getStatusLabel(article.status)}
                     color={getStatusColor(article.status)}
                     size="small"
                     sx={{ mr: 1 }}
                   />
                   <Chip
-                    label={`${article.wordCount} mots`}
+                    label={t('articles.wordCount', { count: article.wordCount })}
                     size="small"
                   />
                 </Box>
 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body2" color="text.secondary">
-                    Projet: {article.project}
+                    {t('articles.projectLabel')}: {article.project}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {article.status === 'published' ? 'Publié le' : 'Prévu le'} {new Date(article.publishDate).toLocaleDateString()}
+                    {article.status === 'published' 
+                      ? t('articles.publishedOn') 
+                      : t('articles.scheduledFor')} {new Date(article.publishDate).toLocaleDateString()}
                   </Typography>
                 </Box>
 
                 <Typography variant="body2" color="text.secondary">
-                  Persona: {article.persona}
+                  {t('articles.personaLabel')}: {article.persona}
                 </Typography>
               </CardContent>
               <CardActions>
                 <Button size="small" component={Link} to={`/articles/${article.id}`}>
-                  Modifier
+                  {t('articles.edit')}
                 </Button>
                 <Button size="small" component={Link} to={`/articles/${article.id}/preview`}>
-                  Aperçu
+                  {t('articles.preview')}
                 </Button>
               </CardActions>
             </Card>
@@ -276,15 +289,15 @@ export const ArticlesList = () => {
       >
         <MenuItem onClick={handleMenuClose}>
           <EditIcon fontSize="small" sx={{ mr: 1 }} />
-          Modifier
+          {t('articles.edit')}
         </MenuItem>
         <MenuItem onClick={handleMenuClose}>
           <CheckCircleIcon fontSize="small" sx={{ mr: 1 }} />
-          Publier
+          {t('articles.publish')}
         </MenuItem>
         <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
           <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-          Supprimer
+          {t('articles.delete')}
         </MenuItem>
       </Menu>
     </Box>

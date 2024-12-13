@@ -1,175 +1,95 @@
 {
-  "translation": {
-    "menu": {
-      "dashboard": "Tableau de bord",
-      "projects": "Mes Projets",
-      "newProject": "Créer un projet",
-      "archivedProjects": "Projets archivés",
-      "articles": "Articles",
-      "personas": "Personas",
-      "newPersona": "Créer un persona",
-      "sites": "Sites",
-      "settings": "Paramètres"
+  "appTitle": "Content Generator SaaS",
+  "menu": {
+    "dashboard": "Tableau de bord",
+    "projects": "Projets",
+    "personas": "Personas",
+    "articles": "Articles",
+    "settings": "Paramètres",
+    "sites": "Sites"
+  },
+  "dashboard": {
+    "welcome": "Bienvenue sur le tableau de bord!",
+    "createNewProject": "Nouveau projet",
+    "stats": {
+      "totalProjects": "Projets totaux",
+      "activeProjects": "Projets actifs",
+      "completedProjects": "Projets terminés",
+      "publishedArticles": "Articles publiés",
+      "monthlyGrowth": "+{{growth}}% ce mois",
+      "draftCount": "{{count}} brouillons"
     },
-    "sections": {
-      "projects": "MES PROJETS",
-      "articles": "MES ARTICLES",
-      "personas": "MES PERSONAS"
+    "status": {
+      "active": "Actif",
+      "completed": "Terminé",
+      "published": "Publié",
+      "draft": "Brouillon",
+      "scheduled": "Programmé"
     },
-    "dashboard": {
-      "title": "Tableau de bord",
-      "welcome": "Bienvenue sur votre tableau de bord",
-      "stats": {
-        "totalProjects": "Projets totaux",
-        "activeProjects": "Projets actifs",
-        "completedProjects": "Projets terminés",
-        "totalArticles": "Articles totaux",
-        "publishedArticles": "Articles publiés",
-        "draftArticles": "Articles en brouillon"
-      },
-      "recentActivity": "Activité récente",
-      "quickActions": "Actions rapides",
-      "createNewProject": "Créer un nouveau projet",
-      "createNewArticle": "Créer un nouvel article",
-      "viewAllProjects": "Voir tous les projets"
+    "recentProjects": "Projets récents",
+    "recentArticles": "Articles récents",
+    "viewAll": "Voir tous",
+    "articleCount": "{{count}} articles",
+    "lastUpdate": "Mis à jour le {{date}}"
+  },
+  "articles": {
+    "myArticles": "Mes Articles",
+    "newArticle": "Nouvel Article",
+    "createNewArticle": "Créer un nouvel article",
+    "selectProject": "Sélectionner un projet",
+    "title": "Titre",
+    "content": "Contenu",
+    "create": "Créer",
+    "search": "Rechercher...",
+    "status": {
+      "label": "Statut",
+      "all": "Tous",
+      "published": "Publié",
+      "draft": "Brouillon",
+      "scheduled": "Programmé"
     },
-    "projects": {
-      "title": "Gestion des projets",
-      "createNew": "Créer un nouveau projet",
-      "filter": "Filtrer les projets",
-      "search": "Rechercher un projet",
-      "status": {
-        "active": "Actif",
-        "completed": "Terminé",
-        "archived": "Archivé",
-        "draft": "Brouillon"
-      },
-      "sort": {
-        "newest": "Plus récent",
-        "oldest": "Plus ancien",
-        "nameAZ": "Nom (A-Z)",
-        "nameZA": "Nom (Z-A)"
-      },
-      "fields": {
-        "name": "Nom du projet",
-        "description": "Description",
-        "status": "Statut",
-        "createdAt": "Créé le",
-        "updatedAt": "Mis à jour le",
-        "deadline": "Date limite"
-      },
-      "myProjects": "Mes Projets",
-      "createNew": "Créer un nouveau projet",
-      "noProjects": "Vous n'avez pas encore de projets",
-      "createFirstProject": "Créer mon premier projet"
-    },
-    "articles": {
-      "title": "Gestion des articles",
-      "createNew": "Créer un nouvel article",
-      "filter": "Filtrer les articles",
-      "search": "Rechercher un article",
-      "generate": "Générer du contenu",
-      "publish": "Publier",
-      "save": "Enregistrer",
-      "preview": "Aperçu",
-      "status": {
-        "published": "Publié",
-        "draft": "Brouillon",
-        "scheduled": "Programmé",
-        "archived": "Archivé"
-      },
-      "fields": {
-        "title": "Titre",
-        "content": "Contenu",
-        "keywords": "Mots-clés",
-        "category": "Catégorie",
-        "author": "Auteur",
-        "publishDate": "Date de publication"
-      }
-    },
-    "personas": {
-      "title": "Gestion des personas",
-      "createNew": "Créer un nouveau persona",
-      "edit": "Modifier le persona",
-      "delete": "Supprimer",
-      "fields": {
-        "name": "Nom",
-        "description": "Description",
-        "tone": "Ton de voix",
-        "style": "Style d'écriture",
-        "audience": "Public cible"
-      }
-    },
-    "sites": {
-      "title": "Mes Sites",
-      "newSite": "Nouveau Site",
-      "editSite": "Modifier le site",
-      "deleteSite": "Supprimer le site",
-      "siteName": "Nom du site",
-      "siteUrl": "URL du site",
-      "siteType": "Type de site",
-      "apiKey": "Clé API",
-      "categories": "Catégories",
-      "autoPublish": "Publication automatique",
-      "lastSync": "Dernière synchronisation",
-      "articlesCount": "Articles publiés",
-      "status": {
-        "connected": "Connecté",
-        "error": "Erreur",
-        "pending": "En attente"
-      },
-      "type": {
-        "wordpress": "WordPress",
-        "custom": "Personnalisé"
-      },
-      "actions": {
-        "sync": "Synchroniser",
-        "settings": "Paramètres API"
-      },
-      "errors": {
-        "connection": "Erreur de connexion. Veuillez vérifier vos identifiants."
-      }
-    },
-    "settings": {
-      "title": "Paramètres",
-      "language": "Langue",
-      "chooseLanguage": "Choisir la langue",
-      "theme": {
-        "title": "Thème",
-        "light": "Clair",
-        "dark": "Sombre",
-        "system": "Système"
-      },
-      "account": {
-        "title": "Compte",
-        "profile": "Profil",
-        "preferences": "Préférences",
-        "notifications": "Notifications",
-        "security": "Sécurité"
-      },
-      "api": {
-        "title": "Configuration API",
-        "openai": "OpenAI API",
-        "wordpress": "WordPress API"
-      }
-    },
-    "common": {
-      "appName": "Content Generator",
-      "save": "Enregistrer",
-      "cancel": "Annuler",
-      "delete": "Supprimer",
-      "edit": "Modifier",
-      "create": "Créer",
-      "search": "Rechercher",
-      "filter": "Filtrer",
-      "sort": "Trier",
-      "loading": "Chargement...",
-      "noResults": "Aucun résultat",
-      "error": "Erreur",
-      "success": "Succès",
-      "confirm": "Confirmer",
-      "actions": "Actions",
-      "status": "Statut"
-    }
+    "project": "Projet",
+    "allProjects": "Tous les projets",
+    "wordCount": "{{count}} mots",
+    "projectLabel": "Projet",
+    "personaLabel": "Persona",
+    "publishedOn": "Publié le",
+    "scheduledFor": "Prévu le",
+    "edit": "Modifier",
+    "preview": "Aperçu",
+    "publish": "Publier",
+    "delete": "Supprimer",
+    "errorLoading": "Erreur lors du chargement des articles",
+    "errorCreating": "Erreur lors de la création de l'article"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "chooseLanguage": "Choisir la langue",
+    "settingsSaved": "Paramètres enregistrés avec succès!",
+    "billingInformation": "Informations de facturation",
+    "companyName": "Nom de l'entreprise",
+    "billingAddress": "Adresse de facturation",
+    "vatNumber": "Numéro de TVA",
+    "paymentMethod": "Méthode de paiement",
+    "creditCard": "Carte de crédit",
+    "paypal": "PayPal",
+    "bankTransfer": "Virement bancaire",
+    "creditCardNumber": "Numéro de carte de crédit",
+    "creditCardExpiry": "Date d'expiration de la carte de crédit",
+    "creditCardCvv": "CVV de la carte de crédit",
+    "paypalEmail": "Email PayPal",
+    "bankAccountHolder": "Titulaire du compte bancaire",
+    "bankIban": "IBAN bancaire",
+    "bankBic": "BIC bancaire",
+    "saveSettings": "Enregistrer les paramètres",
+    "userPreferences": "Préférences utilisateur",
+    "personalInformation": "Informations personnelles",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "address": "Adresse",
+    "postalCode": "Code postal",
+    "city": "Ville",
+    "country": "Pays"
   }
 }

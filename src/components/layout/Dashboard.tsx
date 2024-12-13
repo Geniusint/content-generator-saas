@@ -138,12 +138,29 @@ export const Dashboard = () => {
     }
   };
 
+  const getStatusLabel = (status: 'active' | 'completed' | 'published' | 'draft' | 'scheduled'): string => {
+    switch (status) {
+      case 'active':
+        return t('dashboard.status.active');
+      case 'completed':
+        return t('dashboard.status.completed');
+      case 'published':
+        return t('dashboard.status.published');
+      case 'draft':
+        return t('dashboard.status.draft');
+      case 'scheduled':
+        return t('dashboard.status.scheduled');
+      default:
+        return status;
+    }
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       {/* En-tête avec titre et bouton */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" component="h1">
-          {String(t('dashboard.welcome'))}
+          {t('dashboard.welcome')}
         </Typography>
         <Button
           variant="contained"
@@ -151,7 +168,7 @@ export const Dashboard = () => {
           component={Link}
           to="/new-project"
         >
-          {String(t('dashboard.createNewProject'))}
+          {t('dashboard.createNewProject')}
         </Button>
       </Box>
 
@@ -164,12 +181,12 @@ export const Dashboard = () => {
                 {stats.totalProjects}
               </Typography>
               <Typography color="textSecondary" gutterBottom>
-                {String(t('dashboard.stats.totalProjects'))}
+                {t('dashboard.stats.totalProjects')}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                 <TrendingUpIcon color="success" sx={{ mr: 1 }} />
                 <Typography variant="body2" color="success.main">
-                  +{stats.monthlyGrowth}% ce mois
+                  {t('dashboard.stats.monthlyGrowth', { growth: stats.monthlyGrowth })}
                 </Typography>
               </Box>
             </CardContent>
@@ -183,7 +200,7 @@ export const Dashboard = () => {
                 {stats.activeProjects}
               </Typography>
               <Typography color="textSecondary" gutterBottom>
-                {String(t('dashboard.stats.activeProjects'))}
+                {t('dashboard.stats.activeProjects')}
               </Typography>
               <LinearProgress 
                 variant="determinate" 
@@ -201,7 +218,7 @@ export const Dashboard = () => {
                 {stats.completedProjects}
               </Typography>
               <Typography color="textSecondary" gutterBottom>
-                {String(t('dashboard.stats.completedProjects'))}
+                {t('dashboard.stats.completedProjects')}
               </Typography>
               <LinearProgress 
                 variant="determinate" 
@@ -219,11 +236,11 @@ export const Dashboard = () => {
                 {stats.publishedArticles}
               </Typography>
               <Typography color="textSecondary" gutterBottom>
-                {String(t('dashboard.stats.publishedArticles'))}
+                {t('dashboard.stats.publishedArticles')}
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
                 <Typography variant="body2" color="text.secondary">
-                  {stats.draftArticles} brouillons
+                  {t('dashboard.stats.draftCount', { count: stats.draftArticles })}
                 </Typography>
               </Box>
             </CardContent>
@@ -237,14 +254,14 @@ export const Dashboard = () => {
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Projets récents</Typography>
+              <Typography variant="h6">{t('dashboard.recentProjects')}</Typography>
               <Button
                 endIcon={<ArrowForwardIcon />}
                 component={Link}
                 to="/projects"
                 size="small"
               >
-                Voir tous
+                {t('dashboard.viewAll')}
               </Button>
             </Box>
             <List>
@@ -263,7 +280,7 @@ export const Dashboard = () => {
                         {project.name}
                       </Typography>
                       <Chip
-                        label={project.status === 'active' ? 'Actif' : 'Terminé'}
+                        label={getStatusLabel(project.status)}
                         color={getStatusColor(project.status)}
                         size="small"
                       />
@@ -277,10 +294,10 @@ export const Dashboard = () => {
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                       <Typography variant="body2" color="text.secondary">
-                        {project.articlesCount} articles
+                        {t('dashboard.articleCount', { count: project.articlesCount })}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        Mis à jour le {new Date(project.lastUpdate).toLocaleDateString()}
+                        {t('dashboard.lastUpdate', { date: new Date(project.lastUpdate).toLocaleDateString() })}
                       </Typography>
                     </Box>
                   </ListItem>
@@ -295,14 +312,14 @@ export const Dashboard = () => {
         <Grid item xs={12} md={6}>
           <Paper sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6">Articles récents</Typography>
+              <Typography variant="h6">{t('dashboard.recentArticles')}</Typography>
               <Button
                 endIcon={<ArrowForwardIcon />}
                 component={Link}
                 to="/articles"
                 size="small"
               >
-                Voir tous
+                {t('dashboard.viewAll')}
               </Button>
             </Box>
             <List>
@@ -322,7 +339,7 @@ export const Dashboard = () => {
                       </Typography>
                       <Chip
                         icon={getStatusIcon(article.status)}
-                        label={article.status}
+                        label={getStatusLabel(article.status)}
                         color={getStatusColor(article.status)}
                         size="small"
                       />

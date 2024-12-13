@@ -9,18 +9,22 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Alert
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthProvider';
 import { firestoreService } from '../../services/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const NewArticlePage: React.FC = () => {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [selectedProject, setSelectedProject] = useState('');
 
@@ -36,27 +40,29 @@ const NewArticlePage: React.FC = () => {
         }));
         setProjects(projectsData);
       } catch (error) {
-        console.error('Erreur lors de la récupération des projets:', error);
+        console.error(t('articles.errorLoading'), error);
+        setError(t('articles.errorLoading'));
       }
     };
 
     fetchProjects();
-  }, [currentUser]);
+  }, [currentUser, t]);
 
   const handleCreateArticle = async () => {
     if (!currentUser?.uid || !selectedProject) {
-      console.error('User not authenticated or no project selected');
+      setError(t('articles.errorCreating'));
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
       const articleData = {
         title,
         content,
         authorId: currentUser.uid,
         createdAt: new Date().toISOString(),
-        projectId: selectedProject, // Use selected project ID
+        projectId: selectedProject,
         status: 'draft' as 'draft',
         publishDate: new Date().toISOString(),
         persona: 'default',
@@ -64,9 +70,10 @@ const NewArticlePage: React.FC = () => {
       };
 
       await firestoreService.createArticle(articleData);
-      // Redirect or show success message
+      navigate('/articles');
     } catch (error) {
-      console.error("Erreur lors de la création de l'article:", error);
+      console.error(t('articles.errorCreating'), error);
+      setError(t('articles.errorCreating'));
     } finally {
       setLoading(false);
     }
@@ -75,17 +82,22 @@ const NewArticlePage: React.FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        {t('articles.createNewArticle') as string}
+        {t('articles.createNewArticle')}
       </Typography>
       <Paper sx={{ p: 3 }}>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-              <InputLabel>{t('articles.selectProject') as string}</InputLabel>
+              <InputLabel>{t('articles.selectProject')}</InputLabel>
               <Select
                 value={selectedProject}
                 onChange={(e) => setSelectedProject(e.target.value as string)}
-                label={t('articles.selectProject') as string}
+                label={t('articles.selectProject')}
               >
                 {projects.map((project) => (
                   <MenuItem key={project.id} value={project.id}>
@@ -98,7 +110,7 @@ const NewArticlePage: React.FC = () => {
           <Grid item xs={12}>
             <TextField
               fullWidth
-              label={t('articles.title') as string}
+              label={t('articles.title')}
               variant="outlined"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -107,7 +119,7 @@ const NewArticlePage: React.FC = () => {
           <Grid item xs={12}>
             <TextField
               fullWidth
-              label={t('articles.content') as string}
+              label={t('articles.content')}
               variant="outlined"
               multiline
               rows={6}
@@ -122,7 +134,7 @@ const NewArticlePage: React.FC = () => {
               onClick={handleCreateArticle}
               disabled={loading || !title || !content || !selectedProject}
             >
-              {t('articles.create') as string}
+              {loading ? '...' : t('articles.create')}
             </Button>
           </Grid>
         </Grid>
