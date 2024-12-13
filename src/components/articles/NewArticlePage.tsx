@@ -22,7 +22,6 @@ const NewArticlePage: React.FC = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
@@ -59,16 +58,16 @@ const NewArticlePage: React.FC = () => {
     try {
       const articleData = {
         title,
-        content,
+        content: '',
         authorId: currentUser.uid,
         createdAt: new Date().toISOString(),
         projectId: selectedProject,
         status: 'draft' as 'draft',
         publishDate: new Date().toISOString(),
         persona: 'default',
-        wordCount: content.split(' ').length,
+        wordCount: 0,
       };
-
+      alert('Prompt généré: ' + title);
       await firestoreService.createArticle(articleData);
       navigate('/articles');
     } catch (error) {
@@ -117,22 +116,11 @@ const NewArticlePage: React.FC = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label={t('articles.content')}
-              variant="outlined"
-              multiline
-              rows={6}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            />
-          </Grid>
-          <Grid item xs={12}>
             <Button
               variant="contained"
               color="primary"
               onClick={handleCreateArticle}
-              disabled={loading || !title || !content || !selectedProject}
+              disabled={loading || !title || !selectedProject}
             >
               {loading ? '...' : t('articles.create')}
             </Button>
