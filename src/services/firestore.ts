@@ -279,6 +279,10 @@ export class FirestoreService {
     return this.create<Article>('articles', article as Article);
   }
 
+  async deleteArticle(userId: string, articleId: string) {
+    return this.delete('articles', articleId);
+  }
+
   // Personas methods
   async getPersonas() {
     const userId = await this.ensureUser();

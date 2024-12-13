@@ -39,12 +39,18 @@ import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 interface Article {
   id: string;
   title: string;
-  project: string;
+  projectId: string;
   status: 'published' | 'draft' | 'scheduled';
   publishDate: string;
   excerpt: string;
   persona: string;
   wordCount: number;
+  project?: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
 }
 
 export const ArticlesList = () => {
@@ -57,18 +63,54 @@ export const ArticlesList = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (!currentUser) return;
+      try {
+        const projectsSnapshot = await firestoreService.getProjects();
+        const projectsData = projectsSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+          id: doc.id,
+          name: doc.data().name,
+        } as Project));
+        setProjects(projectsData);
+      } catch (error) {
+        console.error(t('articles.errorLoadingProjects'), error);
+      }
+    };
+
+    fetchProjects();
+  }, [currentUser, t]);
 
   useEffect(() => {
     const fetchArticles = async () => {
       if (!currentUser) return;
 
       try {
-        const articlesSnapshot = await firestoreService.getArticlesByProject(currentUser.uid);
-        const articlesData = articlesSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
-          id: doc.id,
-          ...doc.data()
-        } as Article));
-
+        let articlesData: Article[] = [];
+        if (projectFilter === 'all') {
+          // Fetch all articles for the user
+          const projectsSnapshot = await firestoreService.getProjects();
+          for (const projectDoc of projectsSnapshot.docs) {
+            const articlesSnapshot = await firestoreService.getProjectArticles(projectDoc.id);
+             articlesData.push(...articlesSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+                id: doc.id,
+                ...doc.data(),
+                projectId: projectDoc.id,
+                project: projectDoc.data().name,
+              } as Article)));
+          }
+        } else {
+          // Fetch articles for the selected project
+          const articlesSnapshot = await firestoreService.getProjectArticles(projectFilter);
+          articlesData = articlesSnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+            id: doc.id,
+            ...doc.data(),
+            projectId: projectFilter,
+             project: projects.find(p => p.id === projectFilter)?.name || 'Unknown',
+          } as Article));
+        }
         setArticles(articlesData);
       } catch (error) {
         console.error(t('articles.errorLoading'), error);
@@ -78,15 +120,22 @@ export const ArticlesList = () => {
     };
 
     fetchArticles();
-  }, [currentUser, t]);
+  }, [currentUser, t, projectFilter, projects]);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>, articleId: string) => {
     setAnchorEl(event.currentTarget);
     setSelectedArticle(articleId);
   };
 
-  const handleMenuClose = () => {
+  const handleMenuClose = (action: string) => {
     setAnchorEl(null);
+    if (selectedArticle) {
+      if (action === 'delete') {
+        handleDeleteArticle(selectedArticle);
+      } else if (action === 'publish') {
+        handlePublishArticle(selectedArticle);
+      }
+    }
     setSelectedArticle(null);
   };
 
@@ -141,10 +190,33 @@ export const ArticlesList = () => {
     }
   };
 
+    const handleDeleteArticle = async (articleId: string) => {
+        if (!currentUser) return;
+        try {
+            await firestoreService.deleteArticle(currentUser.uid, articleId);
+            setArticles(articles.filter(article => article.id !== articleId));
+        } catch (error) {
+            console.error(t('articles.errorDeleting'), error);
+        }
+    };
+
+    const handlePublishArticle = async (articleId: string) => {
+      if (!currentUser) return;
+      try {
+        const article = articles.find(article => article.id === articleId);
+        if (article) {
+          await firestoreService.update('articles', articleId, { status: 'published' });
+          setArticles(articles.map(a => a.id === articleId ? { ...a, status: 'published' } : a));
+        }
+      } catch (error) {
+        console.error(t('articles.errorPublishing'), error);
+      }
+    };
+
   // Filtrer les articles
   const filteredArticles = articles.filter(article => {
     const matchesStatus = statusFilter === 'all' || article.status === statusFilter;
-    const matchesProject = projectFilter === 'all' || article.project === projectFilter;
+     const matchesProject = projectFilter === 'all' || article.projectId === projectFilter;
     const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          article.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesStatus && matchesProject && matchesSearch;
@@ -210,7 +282,11 @@ export const ArticlesList = () => {
                 onChange={handleProjectFilterChange}
               >
                 <MenuItem value="all">{t('articles.allProjects')}</MenuItem>
-                {/* Les projets devraient être chargés dynamiquement */}
+                {projects.map((project) => (
+                  <MenuItem key={project.id} value={project.id}>
+                    {project.name}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
@@ -285,17 +361,17 @@ export const ArticlesList = () => {
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
+        onClose={() => handleMenuClose('')}
       >
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={() => handleMenuClose('edit')}>
           <EditIcon fontSize="small" sx={{ mr: 1 }} />
           {t('articles.edit')}
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={() => handleMenuClose('publish')}>
           <CheckCircleIcon fontSize="small" sx={{ mr: 1 }} />
           {t('articles.publish')}
         </MenuItem>
-        <MenuItem onClick={handleMenuClose} sx={{ color: 'error.main' }}>
+        <MenuItem onClick={() => handleMenuClose('delete')} sx={{ color: 'error.main' }}>
           <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
           {t('articles.delete')}
         </MenuItem>

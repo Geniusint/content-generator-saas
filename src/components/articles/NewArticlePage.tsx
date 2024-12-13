@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthProvider';
 import { firestoreService, Project, Persona, Site } from '../../services/firestore';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 
 const NewArticlePage: React.FC = () => {
   const { t } = useTranslation();
@@ -281,9 +282,9 @@ const NewArticlePage: React.FC = () => {
                 <Typography id="prompt-modal-title" variant="h6" component="h2">
                     Prompt généré
                 </Typography>
-                <Typography id="prompt-modal-description" sx={{ mt: 2, whiteSpace: 'pre-line' }}>
+                <ReactMarkdown >
                     {prompt}
-                </Typography>
+                </ReactMarkdown>
                 <Button onClick={handleCloseModal}>Fermer</Button>
             </Box>
         </Modal>
