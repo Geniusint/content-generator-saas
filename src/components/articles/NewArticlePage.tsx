@@ -51,14 +51,14 @@ const NewArticlePage: React.FC = () => {
     fetchProjects();
   }, [currentUser, t]);
 
-    const handleOpenModal = () => {
-        setOpenModal(true);
-    };
+  const handleOpenModal = () => {
+    setOpenModal(true);
+  };
 
-    const handleCloseModal = () => {
-        setOpenModal(false);
-        navigate('/articles');
-    };
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    navigate('/articles');
+  };
 
   const handleCreateArticle = async () => {
     if (!currentUser?.uid || !selectedProject) {
@@ -77,7 +77,7 @@ const NewArticlePage: React.FC = () => {
         persona = await firestoreService.getPersona(project.persona.id) as Persona;
       }
       if (project.site?.id) {
-          site = await firestoreService.getSite(project.site.id) as Site;
+        site = await firestoreService.getSite(project.site.id) as Site;
       }
 
       let generatedPrompt = `# PROMPT DE RÉDACTION AUTHENTIQUE AVEC RICHESSE SÉMANTIQUE pour le mot clé : **${title}**\n\n`;
@@ -98,12 +98,12 @@ const NewArticlePage: React.FC = () => {
         generatedPrompt += `Tu es un expert en **${persona.profession}** qui :\n`;
         generatedPrompt += `- Utilise naturellement le vocabulaire du secteur\n`;
         generatedPrompt += `- A de l'expérience avec les **${persona.objectifs.join(', ')}**\n`;
-         generatedPrompt += `- Connaît les **${persona.defis.join(', ')}**\n`;
+        generatedPrompt += `- Connaît les **${persona.defis.join(', ')}**\n`;
         generatedPrompt += `- Maîtrise les sujets d'intérêt suivants: **${persona.sujets_interet.join(', ')}**\n\n`;
       }
-      
+
       if (site) {
-          generatedPrompt += `L'article sera publié sur le site web **${site.name}** (**${site.url}**). Le type de site est **${site.siteType}** et l'audience cible est: **${site.targetAudience.join(', ')}**.\n\n`;
+        generatedPrompt += `L'article sera publié sur le site web **${site.name}** (**${site.url}**). Le type de site est **${site.siteType}** et l'audience cible est: **${site.targetAudience.join(', ')}**.\n\n`;
       }
 
       generatedPrompt += `## STRUCTURE DE RÉDACTION\n\n`;
@@ -143,7 +143,7 @@ const NewArticlePage: React.FC = () => {
       generatedPrompt += `#### Intégration Naturelle du Vocabulaire\n`;
       generatedPrompt += `✅ FAIRE :\n`;
       generatedPrompt += `"Je me souviens d'un projet où [TERME TECHNIQUE] prenait tout son sens..."\n`;
-      generatedPrompt += `"Entre nous, dans le métier, on appelle ça [JARGON] - oui, on aime bien nos petits termes !"\n`;
+      generatedPrompt += `"Entre nous, dans le métier, on appelle ça [JARGON] - oui, je sais, on aime nos termes compliqués !"\n`;
       generatedPrompt += `"C'est marrant, mais [EXPRESSION IDIOMATIQUE] prend vraiment tout son sens quand..."\n\n`;
       generatedPrompt += `❌ ÉVITER :\n`;
       generatedPrompt += `"Il est important de noter que [TERME TECHNIQUE]..."\n`;
@@ -188,23 +188,21 @@ const NewArticlePage: React.FC = () => {
       generatedPrompt += `(D'ailleurs, petit aparté technique rapide : dans le métier, on appelle ça [jargon professionnel] - oui, je sais, on aime nos termes compliqués !)\n\n`;
       generatedPrompt += `Ce qui est vraiment [expression idiomatique], c'est que..."\n`;
 
-      setPrompt(generatedPrompt);
-      handleOpenModal();
-
       const articleData = {
         title,
         content: '',
-        authorId: currentUser.uid,
-        createdAt: new Date().toISOString(),
         projectId: selectedProject,
-        status: 'draft' as 'draft',
+        status: 'draft' as const,
         publishDate: new Date().toISOString(),
-        persona: persona?.id ?? 'default',
-        wordCount: 0,
+        persona: project.persona?.id || '',
+        wordCount: 0
       };
+
       await firestoreService.createArticle(articleData);
+      setPrompt(generatedPrompt);
+      handleOpenModal();
     } catch (error) {
-      console.error(t('articles.errorCreating'), error);
+      console.error('Error creating article:', error);
       setError(t('articles.errorCreating'));
     } finally {
       setLoading(false);
@@ -260,34 +258,34 @@ const NewArticlePage: React.FC = () => {
           </Grid>
         </Grid>
       </Paper>
-        <Modal
-            open={openModal}
-            onClose={handleCloseModal}
-            aria-labelledby="prompt-modal-title"
-            aria-describedby="prompt-modal-description"
-        >
-            <Box sx={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '80%',
-                bgcolor: 'background.paper',
-                border: '2px solid #000',
-                boxShadow: 24,
-                p: 4,
-                maxHeight: '80vh',
-                overflow: 'auto'
-            }}>
-                <Typography id="prompt-modal-title" variant="h6" component="h2">
-                    Prompt généré
-                </Typography>
-                <ReactMarkdown >
-                    {prompt}
-                </ReactMarkdown>
-                <Button onClick={handleCloseModal}>Fermer</Button>
-            </Box>
-        </Modal>
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="prompt-modal-title"
+        aria-describedby="prompt-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '80%',
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          boxShadow: 24,
+          p: 4,
+          maxHeight: '80vh',
+          overflow: 'auto'
+        }}>
+          <Typography id="prompt-modal-title" variant="h6" component="h2">
+            Prompt généré
+          </Typography>
+          <ReactMarkdown>
+            {prompt}
+          </ReactMarkdown>
+          <Button onClick={handleCloseModal}>Fermer</Button>
+        </Box>
+      </Modal>
     </Box>
   );
 };

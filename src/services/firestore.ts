@@ -247,29 +247,19 @@ export class FirestoreService {
     });
   }
 
-  async getProjectArticles(projectId: string) {
-    await this.ensureUser();
-    const projectRef = doc(this.db, 'projects', projectId);
-    const articlesQuery = query(
-      collection(projectRef, 'articles'),
-      orderBy('generatedAt', 'desc')
-    );
-    return getDocs(articlesQuery);
-  }
-
   async updateProjectArticle(projectId: string, articleId: string, articleData: Partial<ProjectArticle>) {
     await this.ensureUser();
-    const articleRef = doc(this.db, 'projects', projectId, 'articles', articleId);
-    return updateDoc(articleRef, articleData);
+    const projectRef = doc(this.db, 'projects', projectId);
+    const articleRef = doc(projectRef, 'articles', articleId);
+    await updateDoc(articleRef, articleData);
   }
 
   // Articles methods
-  async getArticlesByProject(projectId: string) {
+  async getArticles() {
     const userId = await this.ensureUser();
     const q = query(
-      collection(this.db, 'articles'), 
+      collection(this.db, 'articles'),
       where('userId', '==', userId),
-      where('projectId', '==', projectId),
       orderBy('publishDate', 'desc')
     );
     return getDocs(q);
