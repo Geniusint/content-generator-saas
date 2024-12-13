@@ -12,7 +12,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  CircularProgress
+  CircularProgress,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -172,29 +174,47 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         required
         error={errors.projectName}
         helperText={errors.projectName ? "Le nom du projet est requis" : ""}
+        InputProps={{
+          style: {
+            color: 'black',
+          },
+        }}
+        InputLabelProps={{
+          style: {
+            color: projectName ? 'black' : '#999',
+            paddingTop: projectName ? '8px' : '0px',
+          },
+          shrink: !!projectName,
+        }}
       />
 
       <Grid container spacing={2}>
         <Grid item xs={10}>
-          <Select
-            label="Site"
-            variant="outlined"
-            fullWidth
-            value={selectedSite}
-            onChange={(e) => setSelectedSite(e.target.value)}
-            displayEmpty
-            required
-            error={errors.site}
-          >
-            <MenuItem value="" disabled>
-              Sélectionner un site
-            </MenuItem>
-            {sites.map((site) => (
-              <MenuItem key={site.id} value={site.id}>
-                {site.name}
-              </MenuItem>
-            ))}
-          </Select>
+          <FormControl fullWidth variant="outlined" error={errors.site}>
+            <Select
+              value={selectedSite}
+              onChange={(e) => setSelectedSite(e.target.value)}
+              required
+              inputProps={{
+                style: {
+                  color: selectedSite ? 'black' : '#666',
+                },
+              }}
+              displayEmpty
+              renderValue={(selected) => {
+                if (!selected) {
+                  return <span style={{ color: '#666' }}>Sélectionner un site</span>;
+                }
+                return sites.find(site => site.id === selected)?.name;
+              }}
+            >
+              {sites.map((site) => (
+                <MenuItem key={site.id} value={site.id}>
+                  {site.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Grid>
         <Grid item xs={2}>
           <Button 
@@ -211,25 +231,32 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
 
       <Grid container spacing={2}>
         <Grid item xs={10}>
-          <Select
-            label="Persona"
-            variant="outlined"
-            fullWidth
-            value={selectedPersona}
-            onChange={(e) => setSelectedPersona(e.target.value)}
-            displayEmpty
-            required
-            error={errors.persona}
-          >
-            <MenuItem value="" disabled>
-              Sélectionner un persona
-            </MenuItem>
-            {personas.map((persona) => (
-              <MenuItem key={persona.id} value={persona.id}>
-                {`${persona.prenom} ${persona.nom}`}
-              </MenuItem>
-            ))}
-          </Select>
+          <FormControl fullWidth variant="outlined" error={errors.persona}>
+            <Select
+              value={selectedPersona}
+              onChange={(e) => setSelectedPersona(e.target.value)}
+              required
+              inputProps={{
+                style: {
+                  color: selectedPersona ? 'black' : '#666',
+                },
+              }}
+              displayEmpty
+              renderValue={(selected) => {
+                if (!selected) {
+                  return <span style={{ color: '#666' }}>Sélectionner un persona</span>;
+                }
+                const persona = personas.find(p => p.id === selected);
+                return persona ? `${persona.prenom} ${persona.nom}` : '';
+              }}
+            >
+              {personas.map((persona) => (
+                <MenuItem key={persona.id} value={persona.id}>
+                  {`${persona.prenom} ${persona.nom}`}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Grid>
         <Grid item xs={2}>
           <Button 

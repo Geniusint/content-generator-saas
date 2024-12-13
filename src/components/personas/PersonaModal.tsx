@@ -25,7 +25,6 @@ const initialPersonaState: Omit<Persona, 'id' | 'userId'> = {
   sujets_interet: [],
   style_langage_prefere: 'simple',
   tonalite_preferee: 'pédagogique',
-  sources_information_habituelles: [],
   langue: 'fr'
 };
 
@@ -67,7 +66,6 @@ export const PersonaModal: React.FC<PersonaModalProps> = ({
     sujets_interet: initialData.sujets_interet,
     style_langage_prefere: initialData.style_langage_prefere,
     tonalite_preferee: initialData.tonalite_preferee,
-    sources_information_habituelles: initialData.sources_information_habituelles,
     langue: initialData.langue
   } : initialPersonaState);
 
@@ -245,16 +243,6 @@ export const PersonaModal: React.FC<PersonaModalProps> = ({
                 ))}
               </Select>
             </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Sources d'information habituelles (séparées par des virgules)"
-              value={formData.sources_information_habituelles.join(', ')}
-              onChange={(e) => handleArrayChange('sources_information_habituelles', e.target.value)}
-              multiline
-              rows={2}
-            />
           </Grid>
         </Grid>
       </DialogContent>

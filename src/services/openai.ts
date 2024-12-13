@@ -40,7 +40,6 @@ export const generatePersona = async (description: string): Promise<Omit<Persona
     - Sujets d'intérêt (liste)
     - Style de langage préféré (DOIT être exactement l'une de ces valeurs: simple, neutre ou soutenu)
     - Tonalité préférée (DOIT être exactement l'une de ces valeurs: pédagogique, humoristique ou sérieux)
-    - Sources d'information habituelles (liste)
     - Langue principale (DOIT être exactement l'une de ces valeurs: fr, en, es, de, ou it)
     
     IMPORTANT: Les champs niveau_expertise, style_langage_prefere, tonalite_preferee et langue DOIVENT correspondre EXACTEMENT aux valeurs spécifiées.
@@ -73,7 +72,6 @@ export const generatePersona = async (description: string): Promise<Omit<Persona
       sujets_interet: Array.isArray(persona.sujets_interet) ? persona.sujets_interet : [],
       style_langage_prefere: validateStyleLangage(persona.style_langage_prefere),
       tonalite_preferee: validateTonalite(persona.tonalite_preferee),
-      sources_information_habituelles: Array.isArray(persona.sources_information_habituelles) ? persona.sources_information_habituelles : [],
       langue: validateLangue(persona.langue)
     };
 

@@ -74,7 +74,6 @@ export interface Persona {
   sujets_interet: string[];
   style_langage_prefere: 'simple' | 'neutre' | 'soutenu';
   tonalite_preferee: 'pédagogique' | 'humoristique' | 'sérieux';
-  sources_information_habituelles: string[];
   langue: string;
 }
 

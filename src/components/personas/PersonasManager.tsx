@@ -55,7 +55,6 @@ const initialPersonaState: Omit<Persona, 'id' | 'userId'> = {
   sujets_interet: [],
   style_langage_prefere: 'simple',
   tonalite_preferee: 'pédagogique',
-  sources_information_habituelles: [],
   langue: 'fr'
 };
 
@@ -103,8 +102,7 @@ export const PersonasManager = () => {
     ...initialPersonaState,
     objectifs: [],
     defis: [],
-    sujets_interet: [],
-    sources_information_habituelles: []
+    sujets_interet: []
   });
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -189,7 +187,6 @@ export const PersonasManager = () => {
         sujets_interet: persona.sujets_interet || [],
         style_langage_prefere: persona.style_langage_prefere,
         tonalite_preferee: persona.tonalite_preferee,
-        sources_information_habituelles: persona.sources_information_habituelles || [],
         langue: persona.langue
       });
       setSelectedPersonaId(persona.id);
@@ -198,8 +195,7 @@ export const PersonasManager = () => {
         ...initialPersonaState,
         objectifs: [],
         defis: [],
-        sujets_interet: [],
-        sources_information_habituelles: []
+        sujets_interet: []
       });
       setSelectedPersonaId(null);
     }
@@ -214,8 +210,7 @@ export const PersonasManager = () => {
       ...initialPersonaState,
       objectifs: [],
       defis: [],
-      sujets_interet: [],
-      sources_information_habituelles: []
+      sujets_interet: []
     });
     setSelectedPersonaId(null);
   };
@@ -743,16 +738,6 @@ export const PersonasManager = () => {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Sources d'information habituelles (séparées par des virgules)"
-                value={currentPersona.sources_information_habituelles.join(', ')}
-                onChange={(e) => handleArrayInputChange('sources_information_habituelles', e.target.value)}
-                multiline
-                rows={2}
-              />
             </Grid>
           </Grid>
         </DialogContent>
