@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthProvider';
-import { firestoreService } from '../../services/firestore';
+import { firestoreService, Project, Persona, Site } from '../../services/firestore';
 import { useNavigate } from 'react-router-dom';
 
 const NewArticlePage: React.FC = () => {
@@ -56,6 +56,27 @@ const NewArticlePage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
+      const project = await firestoreService.getProject(selectedProject) as Project;
+      let persona: Persona | null = null;
+      let site: Site | null = null;
+
+      if (project.persona?.id) {
+        persona = await firestoreService.getPersona(project.persona.id) as Persona;
+      }
+      if (project.site?.id) {
+          site = await firestoreService.getSite(project.site.id) as Site;
+      }
+
+      let prompt = `En tant que ${persona?.profession} ${persona?.niveau_expertise}, rédige un article sur le sujet suivant: ${title}. `;
+
+      if (persona) {
+        prompt += `Utilise tes compétences et tes connaissances pour aborder ce sujet. Tes objectifs sont: ${persona.objectifs.join(', ')}. Tes défis sont: ${persona.defis.join(', ')}. Tes sujets d'intérêt sont: ${persona.sujets_interet.join(', ')}. Tu préfères un style de langage ${persona.style_langage_prefere} et une tonalité ${persona.tonalite_preferee}. `;
+      }
+
+      if (site) {
+        prompt += `L'article sera publié sur le site web ${site.name} (${site.url}). Le type de site est ${site.siteType} et l'audience cible est: ${site.targetAudience.join(', ')}. `;
+      }
+
       const articleData = {
         title,
         content: '',
@@ -64,10 +85,10 @@ const NewArticlePage: React.FC = () => {
         projectId: selectedProject,
         status: 'draft' as 'draft',
         publishDate: new Date().toISOString(),
-        persona: 'default',
+        persona: persona?.id ?? 'default',
         wordCount: 0,
       };
-      alert('Prompt généré: ' + title);
+      alert('Prompt généré: ' + prompt);
       await firestoreService.createArticle(articleData);
       navigate('/articles');
     } catch (error) {

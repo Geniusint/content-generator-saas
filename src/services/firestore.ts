@@ -181,6 +181,19 @@ export class FirestoreService {
     return getDocs(q);
   }
 
+  async getProject(projectId: string): Promise<Project | null> {
+    try {
+      const projectDoc = await getDoc(doc(this.db, 'projects', projectId));
+      if (projectDoc.exists()) {
+        return { id: projectDoc.id, ...projectDoc.data() } as Project;
+      }
+      return null;
+    } catch (error) {
+      console.error('Erreur lors de la récupération du projet:', error);
+      throw error;
+    }
+  }
+
   async createProject(project: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'articleCount'>) {
     const userId = await this.ensureUser();
     const projectsRef = collection(this.db, 'projects');
@@ -275,6 +288,19 @@ export class FirestoreService {
     );
     return getDocs(q);
   }
+
+  async getPersona(personaId: string): Promise<Persona | null> {
+      try {
+        const personaDoc = await getDoc(doc(this.db, 'personas', personaId));
+        if (personaDoc.exists()) {
+          return { id: personaDoc.id, ...personaDoc.data() } as Persona;
+        }
+        return null;
+      } catch (error) {
+        console.error('Erreur lors de la récupération du persona:', error);
+        throw error;
+      }
+    }
 
   async createPersona(personaData: Omit<Persona, 'id' | 'userId'>) {
     try {
