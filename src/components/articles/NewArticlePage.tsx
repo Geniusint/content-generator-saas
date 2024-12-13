@@ -11,13 +11,11 @@ import {
   Select,
   MenuItem,
   Alert,
-  Modal,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthProvider';
 import { firestoreService, Project, Persona, Site } from '../../services/firestore';
 import { useNavigate } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
 
 const NewArticlePage: React.FC = () => {
   const { t } = useTranslation();
@@ -28,8 +26,6 @@ const NewArticlePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [selectedProject, setSelectedProject] = useState('');
-  const [openModal, setOpenModal] = useState(false);
-  const [prompt, setPrompt] = useState('');
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -51,14 +47,6 @@ const NewArticlePage: React.FC = () => {
     fetchProjects();
   }, [currentUser, t]);
 
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-    navigate('/articles');
-  };
 
   const handleCreateArticle = async () => {
     if (!currentUser?.uid || !selectedProject) {
@@ -190,7 +178,7 @@ const NewArticlePage: React.FC = () => {
 
       const articleData = {
         title,
-        content: '',
+        content: generatedPrompt,
         projectId: selectedProject,
         status: 'draft' as const,
         publishDate: new Date().toISOString(),
@@ -199,8 +187,7 @@ const NewArticlePage: React.FC = () => {
       };
 
       await firestoreService.createArticle(articleData);
-      setPrompt(generatedPrompt);
-      handleOpenModal();
+      navigate('/articles');
     } catch (error) {
       console.error('Error creating article:', error);
       setError(t('articles.errorCreating'));
@@ -258,34 +245,6 @@ const NewArticlePage: React.FC = () => {
           </Grid>
         </Grid>
       </Paper>
-      <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        aria-labelledby="prompt-modal-title"
-        aria-describedby="prompt-modal-description"
-      >
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: '80%',
-          bgcolor: 'background.paper',
-          border: '2px solid #000',
-          boxShadow: 24,
-          p: 4,
-          maxHeight: '80vh',
-          overflow: 'auto'
-        }}>
-          <Typography id="prompt-modal-title" variant="h6" component="h2">
-            Prompt généré
-          </Typography>
-          <ReactMarkdown>
-            {prompt}
-          </ReactMarkdown>
-          <Button onClick={handleCloseModal}>Fermer</Button>
-        </Box>
-      </Modal>
     </Box>
   );
 };
