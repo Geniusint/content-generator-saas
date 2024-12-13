@@ -53,6 +53,7 @@
     "wordCount": "{{count}} mots",
     "projectLabel": "Projet",
     "personaLabel": "Persona",
+    "persona": "Persona",
     "publishedOn": "Publié le",
     "scheduledFor": "Prévu le",
     "edit": "Modifier",
@@ -60,7 +61,9 @@
     "publish": "Publier",
     "delete": "Supprimer",
     "errorLoading": "Erreur lors du chargement des articles",
-    "errorCreating": "Erreur lors de la création de l'article"
+    "errorCreating": "Erreur lors de la création de l'article",
+    "errorLoadingProjects": "Erreur lors du chargement des projets",
+    "errorLoadingPersonas": "Erreur lors du chargement des personas"
   },
   "settings": {
     "title": "Paramètres",

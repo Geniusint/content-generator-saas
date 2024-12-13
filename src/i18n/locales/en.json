@@ -53,6 +53,7 @@
     "wordCount": "{{count}} words",
     "projectLabel": "Project",
     "personaLabel": "Persona",
+    "persona": "Persona",
     "publishedOn": "Published on",
     "scheduledFor": "Scheduled for",
     "edit": "Edit",
@@ -60,7 +61,9 @@
     "publish": "Publish",
     "delete": "Delete",
     "errorLoading": "Error loading articles",
-    "errorCreating": "Error creating article"
+    "errorCreating": "Error creating article",
+    "errorLoadingProjects": "Error loading projects",
+    "errorLoadingPersonas": "Error loading personas"
   },
   "settings": {
     "title": "Settings",
