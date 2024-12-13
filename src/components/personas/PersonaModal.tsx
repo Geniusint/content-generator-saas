@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -12,7 +12,7 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import { Persona } from '../../services/firestore';
+import { Persona, Site, firestoreService } from '../../services/firestore';
 
 const initialPersonaState: Omit<Persona, 'id' | 'userId'> = {
   prenom: '',
@@ -25,7 +25,8 @@ const initialPersonaState: Omit<Persona, 'id' | 'userId'> = {
   sujets_interet: [],
   style_langage_prefere: 'simple',
   tonalite_preferee: 'pédagogique',
-  langue: 'fr'
+  langue: 'fr',
+  siteId: ''
 };
 
 const niveauxExpertise = ['novice', 'intermédiaire', 'expert'];
@@ -66,13 +67,30 @@ export const PersonaModal: React.FC<PersonaModalProps> = ({
     sujets_interet: initialData.sujets_interet,
     style_langage_prefere: initialData.style_langage_prefere,
     tonalite_preferee: initialData.tonalite_preferee,
-    langue: initialData.langue
+    langue: initialData.langue,
+    siteId: initialData.siteId || ''
   } : initialPersonaState);
 
   const [errors, setErrors] = useState({
     prenom: false,
     nom: false
   });
+
+  const [sites, setSites] = useState<Site[]>([]);
+
+  useEffect(() => {
+    const fetchSites = async () => {
+      try {
+        const sitesSnapshot = await firestoreService.getSites();
+        const sitesData = sitesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Site));
+        setSites(sitesData);
+      } catch (error) {
+        console.error('Error fetching sites:', error);
+      }
+    };
+
+    fetchSites();
+  }, []);
 
   const handleChange = (field: keyof Omit<Persona, 'id' | 'userId'>, value: any) => {
     setFormData(prev => ({
@@ -211,6 +229,23 @@ export const PersonaModal: React.FC<PersonaModalProps> = ({
               multiline
               rows={2}
             />
+          </Grid>
+           <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel>Site</InputLabel>
+              <Select
+                value={formData.siteId}
+                onChange={(e) => handleChange('siteId', e.target.value)}
+                label="Site"
+              >
+                <MenuItem value="">Aucun site</MenuItem>
+                {sites.map((site) => (
+                  <MenuItem key={site.id} value={site.id}>
+                    {site.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>

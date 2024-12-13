@@ -28,10 +28,10 @@ export interface Project {
     id: string;  // Référence à la collection sites
     name: string;
   };
-  persona: {
+  persona?: Partial<{
     id: string;  // Référence à la collection personas
     name: string;
-  };
+  }>;
   status: 'draft' | 'active' | 'completed';
   articleCount: number;
   createdAt?: Timestamp;
@@ -75,6 +75,7 @@ export interface Persona {
   style_langage_prefere: 'simple' | 'neutre' | 'soutenu';
   tonalite_preferee: 'pédagogique' | 'humoristique' | 'sérieux';
   langue: string;
+  siteId?: string;
 }
 
 export interface Site {

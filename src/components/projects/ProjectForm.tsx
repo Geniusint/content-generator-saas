@@ -21,14 +21,13 @@ import { useNavigate } from 'react-router-dom';
 
 import { firestoreService } from '../../services/firestore';
 import { useAuth } from '../auth/AuthProvider';
-import { PersonaModal } from '../../components/personas/PersonaModal';
 import { SiteModal } from '../sites/SiteModal';
+import { PersonaModal } from '../personas/PersonaModal';
 import { Project, Site, Persona } from '../../services/firestore';
 
 interface ProjectFormProps {
   project?: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'articleCount'>;
   projectId?: string | null;
-  persona?: string;
   keywords?: string[];
   mode?: 'page' | 'modal';
   onSuccess?: () => Promise<void>;
@@ -39,7 +38,6 @@ interface ProjectFormProps {
 export const ProjectForm: React.FC<ProjectFormProps> = ({
   project,
   projectId,
-  persona = '',
   keywords = [],
   mode = 'page',
   onSuccess,
@@ -50,21 +48,22 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   const navigate = useNavigate();
   const { currentUser } = useAuth();
 
-  const [projectName, setProjectName] = useState('');
-  const [selectedSite, setSelectedSite] = useState('');
-  const [selectedPersona, setSelectedPersona] = useState(persona);
+  const [projectName, setProjectName] = useState(project?.name || '');
+  const [selectedSite, setSelectedSite] = useState(project?.site.id || '');
+  const [selectedPersona, setSelectedPersona] = useState(project?.persona?.id || '');
+  const [projectStatus, setProjectStatus] = useState(project?.status || 'draft');
   const [isLoading, setIsLoading] = useState(false);
-  const [isPersonaModalOpen, setIsPersonaModalOpen] = useState(false);
   const [isSiteModalOpen, setIsSiteModalOpen] = useState(false);
+  const [isPersonaModalOpen, setIsPersonaModalOpen] = useState(false);
   const [errors, setErrors] = useState({
     projectName: false,
     site: false,
-    persona: false
   });
 
   // États pour les listes déroulantes
   const [sites, setSites] = useState<Site[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
+  const [filteredPersonas, setFilteredPersonas] = useState<Persona[]>([]);
 
   // Charger les sites et personas
   useEffect(() => {
@@ -73,9 +72,9 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
 
       try {
         const sitesSnapshot = await firestoreService.getSites();
-        const personasSnapshot = await firestoreService.getPersonas();
-
         setSites(sitesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Site)));
+
+        const personasSnapshot = await firestoreService.getPersonas();
         setPersonas(personasSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Persona)));
       } catch (error) {
         console.error('Erreur lors du chargement des sites et personas', error);
@@ -85,6 +84,16 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     fetchData();
   }, [currentUser]);
 
+  // Filtrer les personas en fonction du site sélectionné
+  useEffect(() => {
+    if (selectedSite && personas.length > 0) {
+      const filtered = personas.filter(persona => persona.siteId === selectedSite);
+      setFilteredPersonas(filtered);
+    } else {
+        setFilteredPersonas(personas);
+    }
+  }, [selectedSite, personas]);
+
   const handleCreateProject = async () => {
     if (!currentUser) return;
 
@@ -92,7 +101,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     const newErrors = {
       projectName: !projectName.trim(),
       site: !selectedSite,
-      persona: !selectedPersona
     };
     
     setErrors(newErrors);
@@ -104,47 +112,39 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
 
     setIsLoading(true);
     try {
-      const selectedPersonaData = personas.find(p => p.id === selectedPersona);
       const projectData: Omit<Project, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'articleCount'> = {
         name: projectName,
         site: { 
           id: selectedSite, 
           name: sites.find(s => s.id === selectedSite)?.name || '' 
         },
-        persona: { 
-          id: selectedPersona, 
-          name: selectedPersonaData ? `${selectedPersonaData.prenom} ${selectedPersonaData.nom}` : '' 
-        },
-        status: 'draft',
+        persona: selectedPersona ? {
+          id: selectedPersona,
+          name: personas.find(p => p.id === selectedPersona)?.prenom + ' ' + personas.find(p => p.id === selectedPersona)?.nom || ''
+        } : undefined,
+        status: projectStatus,
       };
 
-      const projectRef = await firestoreService.createProject(projectData);
+      if (projectId && editMode) {
+        await firestoreService.updateProject(projectId, projectData);
+      } else {
+        const projectRef = await firestoreService.createProject(projectData);
+        if (mode === 'modal' && onSuccess) {
+          await onSuccess();
+        } else {
+          navigate(`/projects/${projectRef.id}`);
+        }
+      }
       
       if (mode === 'modal' && onSuccess) {
         await onSuccess();
       } else {
-        navigate(`/projects/${projectRef.id}`);
+        navigate('/projects');
       }
     } catch (error) {
       console.error('Erreur lors de la création du projet', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handlePersonaCreated = async (personaData: Omit<Persona, "id" | "userId">) => {
-    try {
-      const newPersonaRef = await firestoreService.createPersona(personaData);
-      const newPersona = {
-        id: newPersonaRef.id,
-        userId: currentUser?.uid || '',
-        ...personaData
-      };
-      setPersonas(prev => [...prev, newPersona]);
-      setSelectedPersona(newPersonaRef.id);
-      setIsPersonaModalOpen(false);
-    } catch (error) {
-      console.error('Erreur lors de la création du persona', error);
     }
   };
 
@@ -155,6 +155,22 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
     }
     setIsSiteModalOpen(false);
   };
+
+    const handlePersonaCreated = async (newPersona: Omit<Persona, 'id' | 'userId'>) => {
+        if (!currentUser) return;
+        
+        const personaRef = await firestoreService.createPersona(newPersona);
+        
+        const personaWithUserId = {
+            ...newPersona,
+            userId: currentUser.uid,
+            id: personaRef.id
+        } as Persona;
+
+        setPersonas(prev => [...prev, personaWithUserId]);
+        setSelectedPersona(personaRef.id);
+        setIsPersonaModalOpen(false);
+    };
 
   const renderForm = () => (
     <Box sx={{ 
@@ -174,7 +190,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         required
         error={errors.projectName}
         helperText={errors.projectName ? "Le nom du projet est requis" : ""}
-        InputProps={{
+         InputProps={{
           style: {
             color: 'black',
           },
@@ -229,56 +245,72 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         </Grid>
       </Grid>
 
-      <Grid container spacing={2}>
-        <Grid item xs={10}>
-          <FormControl fullWidth variant="outlined" error={errors.persona}>
-            <Select
-              value={selectedPersona}
-              onChange={(e) => setSelectedPersona(e.target.value)}
-              required
-              inputProps={{
-                style: {
-                  color: selectedPersona ? 'black' : '#666',
-                },
-              }}
-              displayEmpty
-              renderValue={(selected) => {
-                if (!selected) {
-                  return <span style={{ color: '#666' }}>Sélectionner un persona</span>;
-                }
-                const persona = personas.find(p => p.id === selected);
-                return persona ? `${persona.prenom} ${persona.nom}` : '';
-              }}
-            >
-              {personas.map((persona) => (
-                <MenuItem key={persona.id} value={persona.id}>
-                  {`${persona.prenom} ${persona.nom}`}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+        <Grid container spacing={2}>
+            <Grid item xs={10}>
+                <FormControl fullWidth variant="outlined">
+                    <InputLabel id="project-persona-label">Persona du projet</InputLabel>
+                    <Select
+                        labelId="project-persona-label"
+                        id="project-persona"
+                        value={selectedPersona}
+                        onChange={(e) => setSelectedPersona(e.target.value as string)}
+                        label="Persona du projet"
+                        displayEmpty
+                        renderValue={(selected) => {
+                            if (!selected) {
+                                return <span style={{ color: '#666' }}>Sélectionner un persona</span>;
+                            }
+                            const persona = filteredPersonas.find(persona => persona.id === selected);
+                            return persona ? `${persona.prenom} ${persona.nom}` : 'Aucun persona pour ce site';
+                        }}
+                    >
+                        <MenuItem value="">
+                            <em>Aucun</em>
+                        </MenuItem>
+                        {filteredPersonas.map((persona) => (
+                            <MenuItem key={persona.id} value={persona.id}>
+                                {persona.prenom} {persona.nom}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => setIsPersonaModalOpen(true)}
+                    fullWidth
+                    sx={{ height: '100%' }}
+                >
+                    +
+                </Button>
+            </Grid>
         </Grid>
-        <Grid item xs={2}>
-          <Button 
-            variant="outlined" 
-            color="primary"
-            onClick={() => setIsPersonaModalOpen(true)}
-            fullWidth
-            sx={{ height: '100%' }}
-          >
-            +
-          </Button>
-        </Grid>
-      </Grid>
+
+      <FormControl fullWidth variant="outlined">
+        <InputLabel id="project-status-label">Status du projet</InputLabel>
+        <Select
+          labelId="project-status-label"
+          id="project-status"
+          value={projectStatus}
+          onChange={(e) => setProjectStatus(e.target.value as 'draft' | 'active' | 'completed')}
+          label="Status du projet"
+        >
+          <MenuItem value="draft">Brouillon</MenuItem>
+          <MenuItem value="active">Actif</MenuItem>
+          <MenuItem value="completed">Terminé</MenuItem>
+        </Select>
+      </FormControl>
 
       <Button
         variant="contained"
         color="primary"
-        disabled={!projectName || !selectedSite || !selectedPersona || isLoading}
+        disabled={!projectName || !selectedSite || isLoading}
         onClick={handleCreateProject}
         startIcon={isLoading ? <CircularProgress size={20} /> : null}
       >
-        {isLoading ? 'Création en cours...' : 'Créer le projet'}
+        {isLoading ? (editMode ? 'Mise à jour en cours...' : 'Création en cours...') : (editMode ? 'Mettre à jour le projet' : 'Créer le projet')}
       </Button>
     </Box>
   );
@@ -288,13 +320,13 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       {mode === 'page' ? (
         <Container maxWidth="md" sx={{ mt: 4 }}>
           <Typography variant="h4" gutterBottom>
-            Créer un nouveau projet
+            {editMode ? 'Modifier le projet' : 'Créer un nouveau projet'}
           </Typography>
           {renderForm()}
         </Container>
       ) : (
         <>
-          <DialogTitle>Créer un nouveau projet</DialogTitle>
+          <DialogTitle>{editMode ? 'Modifier le projet' : 'Créer un nouveau projet'}</DialogTitle>
           <DialogContent sx={{ p: 3 }}>
             {renderForm()}
           </DialogContent>
@@ -304,16 +336,16 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         </>
       )}
 
-      <PersonaModal 
-        open={isPersonaModalOpen} 
-        onClose={() => setIsPersonaModalOpen(false)} 
-        onPersonaCreated={handlePersonaCreated}
-      />
       <SiteModal 
         open={isSiteModalOpen} 
         onClose={() => setIsSiteModalOpen(false)} 
         onSiteCreated={handleSiteCreated}
       />
+        <PersonaModal
+            open={isPersonaModalOpen}
+            onClose={() => setIsPersonaModalOpen(false)}
+            onPersonaCreated={handlePersonaCreated}
+        />
     </>
   );
 };

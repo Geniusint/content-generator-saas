@@ -36,11 +36,12 @@ import {
   Language as LanguageIcon,
   Work as WorkIcon,
   School as EducationIcon,
-  Psychology as PsychologyIcon
+  Psychology as PsychologyIcon,
+  Web as WebIcon
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthProvider';
-import { firestoreService, Persona } from '../../services/firestore';
+import { firestoreService, Persona, Site } from '../../services/firestore';
 import { generatePersona } from '../../services/openai';
 import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 
@@ -55,7 +56,8 @@ const initialPersonaState: Omit<Persona, 'id' | 'userId'> = {
   sujets_interet: [],
   style_langage_prefere: 'simple',
   tonalite_preferee: 'pédagogique',
-  langue: 'fr'
+  langue: 'fr',
+  siteId: ''
 };
 
 const niveauxExpertise = ['novice', 'intermédiaire', 'expert'];
@@ -115,14 +117,17 @@ export const PersonasManager = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [filters, setFilters] = useState({
     searchTerm: '',
-    profession: 'all',
     langue: 'all',
-    niveau_expertise: 'all'
+    niveau_expertise: 'all',
+    siteId: 'all',
+    tonalite_preferee: 'all'
   });
+  const [sites, setSites] = useState<Record<string, Site>>({});
 
   useEffect(() => {
     if (currentUser) {
       loadPersonas();
+      loadSites();
     }
   }, [currentUser]);
 
@@ -140,16 +145,20 @@ export const PersonasManager = () => {
       );
     }
 
-    if (filters.profession !== 'all') {
-      filtered = filtered.filter(persona => persona.profession === filters.profession);
-    }
-
     if (filters.langue !== 'all') {
       filtered = filtered.filter(persona => persona.langue === filters.langue);
     }
 
     if (filters.niveau_expertise !== 'all') {
       filtered = filtered.filter(persona => persona.niveau_expertise === filters.niveau_expertise);
+    }
+    
+     if (filters.siteId !== 'all') {
+      filtered = filtered.filter(persona => persona.siteId === filters.siteId);
+    }
+    
+    if (filters.tonalite_preferee !== 'all') {
+        filtered = filtered.filter(persona => persona.tonalite_preferee === filters.tonalite_preferee);
     }
 
     setFilteredPersonas(filtered);
@@ -174,6 +183,19 @@ export const PersonasManager = () => {
     }
   };
 
+  const loadSites = async () => {
+    try {
+      const sitesSnapshot = await firestoreService.getSites();
+      const sitesData = sitesSnapshot.docs.reduce((acc, doc) => {
+        acc[doc.id] = { id: doc.id, ...doc.data() } as Site;
+        return acc;
+      }, {} as Record<string, Site>);
+      setSites(sitesData);
+    } catch (error) {
+      console.error('Error fetching sites:', error);
+    }
+  };
+
   const handleOpenDialog = (edit: boolean = false, persona?: Persona) => {
     if (edit && persona && persona.id) {
       setCurrentPersona({
@@ -187,7 +209,8 @@ export const PersonasManager = () => {
         sujets_interet: persona.sujets_interet || [],
         style_langage_prefere: persona.style_langage_prefere,
         tonalite_preferee: persona.tonalite_preferee,
-        langue: persona.langue
+        langue: persona.langue,
+        siteId: persona.siteId || ''
       });
       setSelectedPersonaId(persona.id);
     } else {
@@ -376,6 +399,8 @@ export const PersonasManager = () => {
   };
 
   const uniqueProfessions = Array.from(new Set(personas.map(p => p.profession))).filter(Boolean);
+  const uniqueTonalites = Array.from(new Set(personas.map(p => p.tonalite_preferee))).filter(Boolean);
+
 
   const getLanguageName = (code: string): string => {
     const language = langues.find(lang => lang.code === code);
@@ -419,21 +444,39 @@ export const PersonasManager = () => {
               onChange={(e) => setFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
             />
           </Grid>
+          
           <Grid item xs={12} sm={3}>
             <FormControl fullWidth>
-              <InputLabel>Profession</InputLabel>
+              <InputLabel>Site</InputLabel>
               <Select
-                value={filters.profession}
-                onChange={(e) => setFilters(prev => ({ ...prev, profession: e.target.value }))}
-                input={<OutlinedInput label="Profession" />}
+                value={filters.siteId}
+                onChange={(e) => setFilters(prev => ({ ...prev, siteId: e.target.value }))}
+                input={<OutlinedInput label="Site" />}
               >
-                <MenuItem value="all">Toutes les professions</MenuItem>
-                {uniqueProfessions.map((profession) => (
-                  <MenuItem key={profession} value={profession}>{profession}</MenuItem>
+                <MenuItem value="all">Tous les sites</MenuItem>
+                {Object.values(sites).map((site) => (
+                  <MenuItem key={site.id} value={site.id}>{site.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>
           </Grid>
+          
+           <Grid item xs={12} sm={3}>
+            <FormControl fullWidth>
+              <InputLabel>Tonalité</InputLabel>
+              <Select
+                value={filters.tonalite_preferee}
+                 onChange={(e) => setFilters(prev => ({ ...prev, tonalite_preferee: e.target.value }))}
+                input={<OutlinedInput label="Tonalité" />}
+              >
+                <MenuItem value="all">Toutes les tonalités</MenuItem>
+                {uniqueTonalites.map((ton) => (
+                  <MenuItem key={ton} value={ton}>{ton}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          
           <Grid item xs={12} sm={3}>
             <FormControl fullWidth>
               <InputLabel>Langue</InputLabel>
@@ -518,6 +561,17 @@ export const PersonasManager = () => {
                       <ListItemText 
                         primary={persona.profession}
                         secondary={`Niveau: ${persona.niveau_expertise}`}
+                      />
+                    </ListItem>
+                    
+                     <ListItem>
+                      <ListItemIcon>
+                        <WebIcon />
+                      </ListItemIcon>
+                       <Chip
+                        label={persona.siteId && sites[persona.siteId] ? sites[persona.siteId].name : 'Aucun site'}
+                        size="small"
+                        sx={{ bgcolor: categoryColors.sujets_interet }}
                       />
                     </ListItem>
                     
@@ -672,6 +726,23 @@ export const PersonasManager = () => {
                   {langues.map((langue) => (
                     <MenuItem key={langue.code} value={langue.code}>
                       {langue.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+             <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel>Site</InputLabel>
+                <Select
+                  value={currentPersona.siteId}
+                  onChange={(e) => handleInputChange('siteId', e.target.value)}
+                  label="Site"
+                >
+                  <MenuItem value="">Aucun site</MenuItem>
+                  {Object.values(sites).map((site) => (
+                    <MenuItem key={site.id} value={site.id}>
+                      {site.name}
                     </MenuItem>
                   ))}
                 </Select>

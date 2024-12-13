@@ -199,7 +199,7 @@ export const ProjectsPage = () => {
                       Site: {project.site.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Persona: {project.persona.name}
+                      Persona: {project.persona?.name || ''}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       Articles générés: {project.articleCount || 0}
