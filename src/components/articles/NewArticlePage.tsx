@@ -10,7 +10,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Alert
+  Alert,
+  Modal,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthProvider';
@@ -26,6 +27,8 @@ const NewArticlePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [selectedProject, setSelectedProject] = useState('');
+  const [openModal, setOpenModal] = useState(false);
+  const [prompt, setPrompt] = useState('');
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -47,6 +50,15 @@ const NewArticlePage: React.FC = () => {
     fetchProjects();
   }, [currentUser, t]);
 
+    const handleOpenModal = () => {
+        setOpenModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setOpenModal(false);
+        navigate('/articles');
+    };
+
   const handleCreateArticle = async () => {
     if (!currentUser?.uid || !selectedProject) {
       setError(t('articles.errorCreating'));
@@ -67,15 +79,116 @@ const NewArticlePage: React.FC = () => {
           site = await firestoreService.getSite(project.site.id) as Site;
       }
 
-      let prompt = `En tant que ${persona?.profession} ${persona?.niveau_expertise}, rédige un article sur le sujet suivant: ${title}. `;
+      let generatedPrompt = `# PROMPT DE RÉDACTION AUTHENTIQUE AVEC RICHESSE SÉMANTIQUE pour le mot clé : **${title}**\n\n`;
+      generatedPrompt += `## PRÉPARATION DU CONTENU\n\n`;
+      generatedPrompt += `### 1. ANALYSE SÉMANTIQUE À UTILISER\n`;
+      generatedPrompt += `Extrais de l'analyse sémantique précédente :\n`;
+      generatedPrompt += `- 5-7 synonymes et variations du mot-clé principal\n`;
+      generatedPrompt += `- 3-4 expressions courantes du domaine\n`;
+      generatedPrompt += `- 4-5 termes techniques essentiels\n`;
+      generatedPrompt += `- 3-4 questions fréquentes des utilisateurs\n`;
+      generatedPrompt += `- 2-3 cas d'usage concrets\n`;
+      generatedPrompt += `- 4-5 termes du jargon professionnel\n`;
+      generatedPrompt += `- 2-3 expressions idiomatiques du secteur\n`;
+      generatedPrompt += `- 3-4 concepts connexes importants\n\n`;
 
+      generatedPrompt += `### 2. PERSONNAGE ET CONTEXTE\n`;
       if (persona) {
-        prompt += `Utilise tes compétences et tes connaissances pour aborder ce sujet. Tes objectifs sont: ${persona.objectifs.join(', ')}. Tes défis sont: ${persona.defis.join(', ')}. Tes sujets d'intérêt sont: ${persona.sujets_interet.join(', ')}. Tu préfères un style de langage ${persona.style_langage_prefere} et une tonalité ${persona.tonalite_preferee}. `;
+        generatedPrompt += `Tu es un expert en **${persona.profession}** qui :\n`;
+        generatedPrompt += `- Utilise naturellement le vocabulaire du secteur\n`;
+        generatedPrompt += `- A de l'expérience avec les **${persona.objectifs.join(', ')}**\n`;
+         generatedPrompt += `- Connaît les **${persona.defis.join(', ')}**\n`;
+        generatedPrompt += `- Maîtrise les sujets d'intérêt suivants: **${persona.sujets_interet.join(', ')}**\n\n`;
+      }
+      
+      if (site) {
+          generatedPrompt += `L'article sera publié sur le site web **${site.name}** (**${site.url}**). Le type de site est **${site.siteType}** et l'audience cible est: **${site.targetAudience.join(', ')}**.\n\n`;
       }
 
-      if (site) {
-        prompt += `L'article sera publié sur le site web ${site.name} (${site.url}). Le type de site est ${site.siteType} et l'audience cible est: ${site.targetAudience.join(', ')}. `;
-      }
+      generatedPrompt += `## STRUCTURE DE RÉDACTION\n\n`;
+      generatedPrompt += `### Introduction\n`;
+      generatedPrompt += `Commence par :\n`;
+      generatedPrompt += `- Une accroche avec une [EXPRESSION COURANTE] du secteur\n`;
+      generatedPrompt += `- Une situation personnelle utilisant du [JARGON PROFESSIONNEL]\n`;
+      generatedPrompt += `- Un questionnement tiré des [QUESTIONS FRÉQUENTES]\n\n`;
+      generatedPrompt += `Example de structure :\n`;
+      generatedPrompt += `"L'autre jour, en [SITUATION PROFESSIONNELLE], je me suis retrouvé face à [PROBLÉMATIQUE]. Comme beaucoup de [PUBLIC CIBLE], je me suis dit que..."\n\n`;
+
+      generatedPrompt += `### Corps du Texte\n\n`;
+      generatedPrompt += `Pour chaque partie principale :\n\n`;
+      generatedPrompt += `1. Début de section\n`;
+      generatedPrompt += `- Introduis avec une [EXPRESSION IDIOMATIQUE] du secteur\n`;
+      generatedPrompt += `- Pose une [QUESTION FRÉQUENTE] de manière conversationnelle\n`;
+      generatedPrompt += `- Utilise un [TERME TECHNIQUE] dans une anecdote\n\n`;
+      generatedPrompt += `2. Développement\n`;
+      generatedPrompt += `Alterne entre :\n`;
+      generatedPrompt += `- Explications techniques avec [VOCABULAIRE SPÉCIFIQUE]\n`;
+      generatedPrompt += `- Exemples personnels utilisant les [TERMES ASSOCIÉS]\n`;
+      generatedPrompt += `- Solutions pratiques mentionnant les [OUTILS ET ÉQUIPEMENTS]\n`;
+      generatedPrompt += `- Réflexions incluant les [CONCEPTS CONNEXES]\n\n`;
+      generatedPrompt += `3. Transitions Naturelles\n`;
+      generatedPrompt += `Utilise :\n`;
+      generatedPrompt += `- "D'ailleurs, en parlant de [TERME ASSOCIÉ]..."\n`;
+      generatedPrompt += `- "Ça me rappelle une situation avec [CAS D'USAGE]..."\n`;
+      generatedPrompt += `- "Et vous savez ce qui est [EXPRESSION COURANTE] dans ce cas ?"\n\n`;
+
+      generatedPrompt += `### ÉLÉMENTS DE STYLE NATUREL\n\n`;
+      generatedPrompt += `#### Variations de Ton\n`;
+      generatedPrompt += `Alterne entre :\n`;
+      generatedPrompt += `- Expert utilisant le [JARGON PROFESSIONNEL]\n`;
+      generatedPrompt += `- Collègue partageant des [CAS D'USAGE]\n`;
+      generatedPrompt += `- Mentor expliquant les [ASPECTS TECHNIQUES]\n\n`;
+
+      generatedPrompt += `#### Intégration Naturelle du Vocabulaire\n`;
+      generatedPrompt += `✅ FAIRE :\n`;
+      generatedPrompt += `"Je me souviens d'un projet où [TERME TECHNIQUE] prenait tout son sens..."\n`;
+      generatedPrompt += `"Entre nous, dans le métier, on appelle ça [JARGON] - oui, on aime bien nos petits termes !"\n`;
+      generatedPrompt += `"C'est marrant, mais [EXPRESSION IDIOMATIQUE] prend vraiment tout son sens quand..."\n\n`;
+      generatedPrompt += `❌ ÉVITER :\n`;
+      generatedPrompt += `"Il est important de noter que [TERME TECHNIQUE]..."\n`;
+      generatedPrompt += `"Comme défini précédemment, [CONCEPT] est..."\n`;
+      generatedPrompt += `"On peut donc en conclure que..."\n\n`;
+
+      generatedPrompt += `#### Marqueurs de Naturel\n`;
+      generatedPrompt += `Intègre :\n`;
+      generatedPrompt += `- Parenthèses avec des (petites précisions techniques)\n`;
+      generatedPrompt += `- Des "ah tiens, d'ailleurs..." pertinents\n`;
+      generatedPrompt += `- Des questions rhétoriques utilisant les [TERMES ASSOCIÉS]\n`;
+      generatedPrompt += `- Des doutes et nuances sur les [ASPECTS TECHNIQUES]\n\n`;
+
+      generatedPrompt += `### INSTRUCTIONS D'ÉCRITURE\n\n`;
+      generatedPrompt += `1. Pour chaque paragraphe, inclure :\n`;
+      generatedPrompt += `- Au moins 1 terme du champ sémantique\n`;
+      generatedPrompt += `- 1 élément de style conversationnel\n`;
+      generatedPrompt += `- 1 exemple ou anecdote\n\n`;
+      generatedPrompt += `2. Pour les explications techniques :\n`;
+      generatedPrompt += `- Commencer par une situation concrète\n`;
+      generatedPrompt += `- Utiliser le jargon naturellement\n`;
+      generatedPrompt += `- Expliquer avec des analogies\n`;
+      generatedPrompt += `- Relier aux cas d'usage\n\n`;
+      generatedPrompt += `3. Pour le fil conducteur :\n`;
+      generatedPrompt += `- Maintenir une progression logique\n`;
+      generatedPrompt += `- Lier les concepts entre eux\n`;
+      generatedPrompt += `- Revenir sur les points clés\n`;
+      generatedPrompt += `- Anticiper les questions\n\n`;
+
+      generatedPrompt += `## CHECKLIST FINALE\n\n`;
+      generatedPrompt += `Vérifier la présence de :\n`;
+      generatedPrompt += `- [ ] Tous les termes techniques clés\n`;
+      generatedPrompt += `- [ ] Les expressions du secteur\n`;
+      generatedPrompt += `- [ ] Le jargon professionnel\n`;
+      generatedPrompt += `- [ ] Les questions fréquentes\n`;
+      generatedPrompt += `- [ ] Les cas d'usage concrets\n`;
+      generatedPrompt += `- [ ] Les éléments de style naturel\n`;
+      generatedPrompt += `- [ ] Les transitions fluides\n\n`;
+
+      generatedPrompt += `## EXEMPLE DE STRUCTURE\n\n`;
+      generatedPrompt += `"[Expression courante] ! L'autre jour, en travaillant sur [cas d'usage], je me suis retrouvé face à un défi intéressant. Vous savez, ce genre de situation où [terme technique] devient soudain très concret...\n\n`;
+      generatedPrompt += `(D'ailleurs, petit aparté technique rapide : dans le métier, on appelle ça [jargon professionnel] - oui, je sais, on aime nos termes compliqués !)\n\n`;
+      generatedPrompt += `Ce qui est vraiment [expression idiomatique], c'est que..."\n`;
+
+      setPrompt(generatedPrompt);
+      handleOpenModal();
 
       const articleData = {
         title,
@@ -88,9 +201,7 @@ const NewArticlePage: React.FC = () => {
         persona: persona?.id ?? 'default',
         wordCount: 0,
       };
-      alert('Prompt généré: ' + prompt);
       await firestoreService.createArticle(articleData);
-      navigate('/articles');
     } catch (error) {
       console.error(t('articles.errorCreating'), error);
       setError(t('articles.errorCreating'));
@@ -148,6 +259,34 @@ const NewArticlePage: React.FC = () => {
           </Grid>
         </Grid>
       </Paper>
+        <Modal
+            open={openModal}
+            onClose={handleCloseModal}
+            aria-labelledby="prompt-modal-title"
+            aria-describedby="prompt-modal-description"
+        >
+            <Box sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '80%',
+                bgcolor: 'background.paper',
+                border: '2px solid #000',
+                boxShadow: 24,
+                p: 4,
+                maxHeight: '80vh',
+                overflow: 'auto'
+            }}>
+                <Typography id="prompt-modal-title" variant="h6" component="h2">
+                    Prompt généré
+                </Typography>
+                <Typography id="prompt-modal-description" sx={{ mt: 2, whiteSpace: 'pre-line' }}>
+                    {prompt}
+                </Typography>
+                <Button onClick={handleCloseModal}>Fermer</Button>
+            </Box>
+        </Modal>
     </Box>
   );
 };
