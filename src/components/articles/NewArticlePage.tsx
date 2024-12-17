@@ -83,30 +83,9 @@ const NewArticlePage: React.FC = () => {
         site = await firestoreService.getSite(project.site.id) as Site;
       }
 
-      const promptData = {
-        title,
-        topic: title,
-        contentType,
-        semanticAnalysisType,
-        persona: persona ? {
-          profession: persona.profession,
-          objectifs: persona.objectifs,
-          defis: persona.defis,
-          sujets_interet: persona.sujets_interet
-        } : undefined,
-        site: site ? {
-          name: site.name,
-          url: site.url,
-          siteType: site.siteType,
-          targetAudience: site.targetAudience
-        } : undefined
-      };
-
-      const generatedPrompt = generatePrompt(promptData); 
-
       const articleData = {
         title,
-        content: generatedPrompt,
+        content: '',
         projectId: selectedProject,
         status: 'generation' as ArticleStatus,
         publishDate: new Date().toISOString(),
@@ -237,4 +216,4 @@ const NewArticlePage: React.FC = () => {
   );
 };
 
-export default NewArticlePage; 
+export default NewArticlePage;
