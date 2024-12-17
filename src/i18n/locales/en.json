@@ -43,6 +43,7 @@
     "search": "Search...",
     "contentType": "Content Type",
     "semanticAnalysis": "Semantic Analysis Type",
+    "humanize": "Humanize",
     "contentTypes": {
       "blog": "Blog Post",
       "comparison": "Comparison",
