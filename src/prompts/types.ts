@@ -1,4 +1,5 @@
-export type ContentType = 'blog' | 'comparison' | 'recipe' | 'product';
+import { ContentType } from '../content-types';
+
 export type SemanticAnalysisType = 'none' | 'ai' | 'scrape';
 
 export interface PromptData {

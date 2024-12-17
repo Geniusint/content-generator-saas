@@ -18,15 +18,11 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthProvider';
 import { firestoreService, Project, Persona, Site } from '../../services/firestore';
 import { useNavigate } from 'react-router-dom';
-import { generatePrompt, ContentType, SemanticAnalysisType } from '../../prompts';
+import { generatePrompt, SemanticAnalysisType } from '../../prompts';
+import { ContentType, contentTypes } from '../../content-types';
 
 // Types de contenu et d'analyse disponibles
-const CONTENT_TYPES = {
-  BLOG: 'blog',
-  COMPARISON: 'comparison',
-  RECIPE: 'recipe',
-  PRODUCT: 'product'
-} as const;
+const CONTENT_TYPES = contentTypes;
 
 const SEMANTIC_ANALYSIS_TYPES = {
   NONE: 'none',
@@ -172,10 +168,11 @@ const NewArticlePage: React.FC = () => {
                 label={t('articles.contentType')}
                 onChange={(e) => setContentType(e.target.value as ContentType)}
               >
-                <MenuItem value={CONTENT_TYPES.BLOG}>{t('articles.contentTypes.blog')}</MenuItem>
-                <MenuItem value={CONTENT_TYPES.COMPARISON}>{t('articles.contentTypes.comparison')}</MenuItem>
-                <MenuItem value={CONTENT_TYPES.RECIPE}>{t('articles.contentTypes.recipe')}</MenuItem>
-                <MenuItem value={CONTENT_TYPES.PRODUCT}>{t('articles.contentTypes.product')}</MenuItem>
+                {CONTENT_TYPES.map((contentType) => (
+                  <MenuItem key={contentType.type} value={contentType.type}>
+                    {contentType.label}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>

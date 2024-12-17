@@ -1,4 +1,4 @@
-import { PromptData, ContentType, SemanticAnalysisType } from './types';
+import { PromptData, SemanticAnalysisType } from './types';
 import { generateBlogPostPrompt } from './templates/blogPost';
 import { generateComparisonPrompt } from './templates/comparison';
 import { generateRecipePrompt } from './templates/recipe';
@@ -49,4 +49,4 @@ Une fois cette analyse effectuée, utilise les informations suivantes pour gén�
 ${contentPrompt}`;
 };
 
-export * from './types';
+export type { PromptData, SemanticAnalysisType };
