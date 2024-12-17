@@ -17,6 +17,7 @@ import {
 import { useTranslation } from 'react-i18next'; 
 import { useAuth } from '../auth/AuthProvider'; 
 import { firestoreService, Project, Persona, Site } from '../../services/firestore'; 
+import { articleGeneratorService } from '../../services/articleGenerator';
 import { useNavigate } from 'react-router-dom'; 
 import { generatePrompt, SemanticAnalysisType } from '../../prompts'; 
 import { ContentType, contentTypes } from '../../content-types'; 
@@ -107,7 +108,9 @@ const NewArticlePage: React.FC = () => {
         humanize
       };
 
-      await firestoreService.createArticle(articleData); 
+      const docRef = await firestoreService.createArticle(articleData); 
+      // Lancer la génération en arrière-plan après la création
+      articleGeneratorService.generateArticle(docRef.id);
       navigate('/articles'); 
     } catch (error) {
       console.error('Error creating article:', error); 
