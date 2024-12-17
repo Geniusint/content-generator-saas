@@ -19,7 +19,7 @@ import { useAuth } from '../auth/AuthProvider';
 import { firestoreService, Project, Persona, Site } from '../../services/firestore'; 
 import { articleGeneratorService } from '../../services/articleGenerator';
 import { useNavigate } from 'react-router-dom'; 
-import { generatePrompt, SemanticAnalysisType } from '../../prompts'; 
+import {SemanticAnalysisType } from '../../prompts'; 
 import { ContentType, contentTypes } from '../../content-types'; 
 import { ArticleStatus } from '../../types/articleStatus'; 
 
