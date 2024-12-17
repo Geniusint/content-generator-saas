@@ -42,7 +42,7 @@ export interface ProjectArticle {
   id?: string;
   title: string;
   content: string;
-  status: 'draft' | 'scheduled' | 'published';
+  status: 'draft' | 'scheduled' | 'published' | 'generation';
   keywords: string[];
   generatedAt: string;
   publishedAt?: string;
@@ -55,7 +55,7 @@ export interface Article {
   userId: string;
   title: string;
   content: string;
-  status: 'draft' | 'scheduled' | 'published';
+  status: 'draft' | 'generation' | 'scheduled' | 'published';
   publishDate: string;
   persona: string;
   wordCount: number;
@@ -271,6 +271,11 @@ export class FirestoreService {
 
   async deleteArticle(userId: string, articleId: string) {
     return this.delete('articles', articleId);
+  }
+
+  // Fonction de génération d'article
+  async generateArticle(articleId: string) {
+    // Fonction vide pour le moment
   }
 
   // Personas methods

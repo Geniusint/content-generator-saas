@@ -60,7 +60,8 @@
       "all": "Tous",
       "published": "Publié",
       "draft": "Brouillon",
-      "scheduled": "Programmé"
+      "scheduled": "Programmé",
+      "generation": "Génération"
     },
     "project": "Projet",
     "allProjects": "Tous les projets",

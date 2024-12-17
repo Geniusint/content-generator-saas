@@ -20,6 +20,7 @@ import { firestoreService, Project, Persona, Site } from '../../services/firesto
 import { useNavigate } from 'react-router-dom';
 import { generatePrompt, SemanticAnalysisType } from '../../prompts';
 import { ContentType, contentTypes } from '../../content-types';
+import { ArticleStatus } from '../../types/articleStatus';
 
 // Types de contenu et d'analyse disponibles
 const CONTENT_TYPES = contentTypes;
@@ -104,11 +105,11 @@ const NewArticlePage: React.FC = () => {
 
       const generatedPrompt = generatePrompt(promptData);
 
-      const articleData = {
+    const articleData = {
         title,
         content: generatedPrompt,
         projectId: selectedProject,
-        status: 'draft' as const,
+        status: 'generation' as ArticleStatus,
         publishDate: new Date().toISOString(),
         persona: project.persona?.id || '',
         wordCount: 0,

@@ -38,7 +38,7 @@ interface Article {
   id?: string;
   title: string;
   content: string;
-  status: 'draft' | 'scheduled' | 'published';
+  status: 'draft' | 'scheduled' | 'published' | 'generation';
   publishDate: string;
   projectId: string;
   persona: string;
@@ -179,6 +179,7 @@ export const ArticlesList = () => {
                 <MenuItem value="published">{t('articles.status.published')}</MenuItem>
                 <MenuItem value="draft">{t('articles.status.draft')}</MenuItem>
                 <MenuItem value="scheduled">{t('articles.status.scheduled')}</MenuItem>
+                <MenuItem value="generation">{t('articles.status.generation')}</MenuItem>
               </Select>
             </FormControl>
           </Grid>
@@ -263,6 +264,7 @@ export const ArticlesList = () => {
               </ListItem>
             )
             })}
+
           {articles.length === 0 && (
             <Typography variant="body1" color="text.secondary" align="center" sx={{ py: 3 }}>
               {t('articles.noArticles')}
