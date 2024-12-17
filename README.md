@@ -1,78 +1,146 @@
 # Content Generator SaaS
 
-Une application SaaS de génération de contenu alimentée par l'IA, similaire à Skoatch.
+## Description
+
+Content Generator SaaS est une plateforme de génération de contenu construite avec React et TypeScript. Elle utilise Material-UI (MUI) pour l'interface utilisateur et Firebase Firestore comme backend pour la gestion des données. L'application permet aux utilisateurs de créer et de gérer des projets, de générer du contenu personnalisé via OpenAI, et de publier directement sur des sites WordPress.
 
 ## Fonctionnalités
 
-- Génération de contenu assistée par IA
-- Ajout automatisé de médias
-- Planification et publication sur WordPress
-- Personnalisation des personas
-- Authentification utilisateur avec Firebase
-- Interface utilisateur responsive
+1. **Gestion des Projets**
+   - Créer, modifier et supprimer des projets.
+   - Association de projets à des sites et des personas.
 
-## Configuration requise
+2. **Authentification**
+   - Inscription et connexion des utilisateurs.
+   - Protection des routes avec des composants sécurisés.
 
-- Node.js 14.x ou supérieur
-- Compte Firebase
-- Compte OpenAI (pour l'API GPT)
-- Site WordPress avec accès API REST
+3. **Génération de Contenu**
+   - Génération de contenu personnalisé basé sur des personas et des mots-clés via OpenAI.
+
+4. **Publication sur WordPress**
+   - Publication automatique du contenu généré sur des sites WordPress configurés.
+
+5. **Gestion des Personas**
+   - Création et gestion de personas pour personnaliser le contenu généré.
+
+6. **Gestion des Sites**
+   - Configuration et gestion des sites de publication.
+
+7. **Configuration et Services**
+   - Service principal : `firestore.ts`, qui encapsule les opérations CRUD pour Firestore.
+   - Configuration Firebase dans `firebase.ts`.
+
+8. **Structure de l'Interface**
+   - Composants : `Layout.tsx` et `Sidebar.tsx`.
+   - Utilisation de `React Router` pour la navigation et de MUI pour une interface réactive et adaptée aux différentes tailles d'écran.
+
+9. **Internationalisation**
+   - Configuration dans `i18n.ts` avec des fichiers de traduction en anglais et en français.
+
+10. **Types et Interfaces**
+    - Définis dans `types/` et `services/firestore.ts`, assurant un typage strict et une gestion cohérente des données.
+
+## Technologies Utilisées
+
+- **Frontend :**
+  - React
+  - TypeScript
+  - Material-UI (MUI)
+  - React Router
+
+- **Backend :**
+  - Firebase Firestore
+
+- **Services :**
+  - OpenAI API
+  - WordPress API
 
 ## Installation
 
-1. Cloner le dépôt
-2. Installer les dépendances :
-```bash
-npm install
-```
+### Prérequis
 
-3. Configurer les variables d'environnement :
-Créer un fichier `.env` à la racine du projet avec :
-```
-REACT_APP_FIREBASE_API_KEY=votre_clé_api
-REACT_APP_FIREBASE_AUTH_DOMAIN=votre_domaine
-REACT_APP_FIREBASE_PROJECT_ID=votre_project_id
-REACT_APP_FIREBASE_STORAGE_BUCKET=votre_bucket
-REACT_APP_FIREBASE_MESSAGING_SENDER_ID=votre_sender_id
-REACT_APP_FIREBASE_APP_ID=votre_app_id
+- [Node.js](https://nodejs.org/) (version 14 ou supérieure)
+- [npm](https://www.npmjs.com/) ou [yarn](https://yarnpkg.com/)
 
-REACT_APP_OPENAI_API_KEY=votre_clé_api_openai
+### Étapes d'installation
 
-REACT_APP_WP_API_URL=votre_url_wordpress
-REACT_APP_WP_USERNAME=votre_username
-REACT_APP_WP_APP_PASSWORD=votre_password
-```
+1. **Cloner le dépôt :**
 
-4. Démarrer l'application :
-```bash
-npm start
-```
+   ```bash
+   git clone https://github.com/votre-utilisateur/content-generator-saas.git
+   cd content-generator-saas
+   ```
 
-## Structure du projet
+2. **Installer les dépendances :**
 
-```
-src/
-  ├── components/
-  │   ├── auth/
-  │   ├── content/
-  │   ├── wordpress/
-  │   └── persona/
-  ├── config/
-  │   └── firebase.ts
-  └── App.tsx
-```
+   ```bash
+   npm install
+   ```
 
-## Sécurité
+   ou
 
-- Toutes les clés API doivent être stockées dans les variables d'environnement
-- L'authentification est gérée via Firebase
-- Les règles de sécurité Firestore doivent être configurées
-- Les tokens WordPress doivent être sécurisés
+   ```bash
+   yarn install
+   ```
+
+3. **Configurer Firebase :**
+
+   - Créez un projet Firebase et obtenez les configurations nécessaires.
+   - Remplissez les variables d'environnement dans `src/config/firebase.ts`.
+
+4. **Configurer OpenAI :**
+
+   - Obtenez une clé API OpenAI.
+   - Ajoutez la clé API dans les paramètres utilisateur via la configuration.
+
+5. **Démarrer le serveur de développement :**
+
+   ```bash
+   npm run dev
+   ```
+
+   ou
+
+   ```bash
+   yarn dev
+   ```
+
+6. **Accéder à l'application :**
+
+   Ouvrez votre navigateur et allez à `http://localhost:3000`.
+
+## Utilisation
+
+1. **Inscription et Connexion :**
+
+   - Inscrivez-vous ou connectez-vous avec un compte existant.
+
+2. **Gestion des Projets :**
+
+   - Créez de nouveaux projets, associez des sites et des personas.
+
+3. **Génération de Contenu :**
+
+   - Utilisez le générateur de contenu pour créer des articles basés sur des personas et des mots-clés.
+
+4. **Publication sur WordPress :**
+
+   - Configurez vos sites WordPress et publiez directement vos articles générés.
 
 ## Contribution
 
-1. Fork le projet
-2. Créer une branche pour votre fonctionnalité
-3. Commiter vos changements
-4. Pousser vers la branche
-5. Ouvrir une Pull Request
+Les contributions sont les bienvenues ! Pour contribuer, veuillez suivre ces étapes :
+
+1. Fork le dépôt.
+2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/ma-fonctionnalité`).
+3. Committez vos changements (`git commit -m 'Ajout d'une nouvelle fonctionnalité'`).
+4. Poussez vers la branche (`git push origin feature/ma-fonctionnalité`).
+5. Ouvrez une Pull Request.
+
+## Licence
+
+Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## Contact
+
+Pour toute question ou suggestion, veuillez contacter [vous@exemple.com](mailto:vous@exemple.com).

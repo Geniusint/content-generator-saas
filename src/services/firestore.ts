@@ -273,10 +273,7 @@ export class FirestoreService {
     return this.delete('articles', articleId);
   }
 
-  // Fonction de génération d'article
-  async generateArticle(articleId: string) {
-    // Fonction vide pour le moment
-  }
+  
 
   // Personas methods
   async getPersonas() {
