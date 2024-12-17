@@ -18,6 +18,8 @@ import {
 } from 'firebase/firestore';
 import { Timestamp } from 'firebase/firestore';
 import { auth } from '../config/firebase';
+import { ContentType } from '../content-types';
+import { SemanticAnalysisType } from '../prompts';
 
 // Types for Firestore collections
 export interface Project {
@@ -57,8 +59,21 @@ export interface Article {
   content: string;
   status: 'draft' | 'generation' | 'scheduled' | 'published';
   publishDate: string;
-  persona: string;
   wordCount: number;
+  contentType: ContentType;
+  semanticAnalysisType: SemanticAnalysisType;
+  persona?: {
+    profession: string;
+    objectifs: string[];
+    defis: string[];
+    sujets_interet: string[];
+  };
+  site?: {
+    name: string;
+    url: string;
+    siteType: 'ecommerce' | 'blog' | 'corporate' | 'portfolio' | 'educational' | 'news';
+    targetAudience: string[];
+  };
 }
 
 export interface Persona {

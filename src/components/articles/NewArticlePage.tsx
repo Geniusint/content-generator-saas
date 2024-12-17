@@ -117,7 +117,18 @@ const NewArticlePage: React.FC = () => {
         projectId: selectedProject,
         status: 'generation' as ArticleStatus,
         publishDate: new Date().toISOString(),
-        persona: project.persona?.id || '',
+        persona: persona ? {
+          profession: persona.profession,
+          objectifs: persona.objectifs,
+          defis: persona.defis,
+          sujets_interet: persona.sujets_interet
+        } : undefined,
+        site: site ? {
+          name: site.name,
+          url: site.url,
+          siteType: site.siteType,
+          targetAudience: site.targetAudience
+        } : undefined,
         wordCount: 0,
         contentType,
         semanticAnalysisType,
