@@ -6,6 +6,12 @@ import { generateProductPrompt } from './templates/product';
 import { generateAIAnalysisPrompt } from './templates/semantic/aiAnalysis';
 import { generateScrapAnalysisPrompt } from './templates/semantic/scrapAnalysis';
 
+const SEMANTIC_PROMPTS = {
+  ai: generateAIAnalysisPrompt,
+  scrape: generateScrapAnalysisPrompt,
+  none: () => ''
+} as const;
+
 const generateContentPrompt = (data: PromptData): string => {
   switch (data.contentType) {
     case 'blog':
@@ -22,16 +28,8 @@ const generateContentPrompt = (data: PromptData): string => {
 };
 
 const generateSemanticPrompt = (data: PromptData): string => {
-  switch (data.semanticAnalysisType) {
-    case 'ai':
-      return generateAIAnalysisPrompt(data);
-    case 'scrape':
-      return generateScrapAnalysisPrompt(data);
-    case 'none':
-      return '';
-    default:
-      throw new Error(`Type d'analyse sémantique non supporté: ${data.semanticAnalysisType}`);
-  }
+  const promptGenerator = SEMANTIC_PROMPTS[data.semanticAnalysisType];
+  return promptGenerator(data);
 };
 
 export const generatePrompt = (data: PromptData): string => {
