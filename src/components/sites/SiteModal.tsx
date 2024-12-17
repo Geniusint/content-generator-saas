@@ -156,7 +156,7 @@ export const SiteModal: React.FC<SiteModalProps> = ({
       const siteData: Omit<FirestoreSite, 'id' | 'userId'> = {
         name: siteName.trim(),
         url: siteUrl.trim(),
-        sitemap: sitemap.trim() || undefined,
+        sitemap: sitemap.trim() || '',
         type: siteType,
         siteType: websiteType,
         targetAudience: targetAudience,

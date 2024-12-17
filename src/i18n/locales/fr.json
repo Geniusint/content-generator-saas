@@ -50,6 +50,7 @@
     },
     "project": "Projet",
     "allProjects": "Tous les projets",
+    "allPersonas": "Tous les personas",
     "wordCount": "{{count}} mots",
     "projectLabel": "Projet",
     "personaLabel": "Persona",
