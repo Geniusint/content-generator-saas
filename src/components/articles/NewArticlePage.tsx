@@ -110,8 +110,9 @@ const NewArticlePage: React.FC = () => {
       };
 
       const docRef = await firestoreService.createArticle(articleData);
-      // Lancer la génération en arrière-plan avec l'article complet
-      await articleGeneratorService.generateArticle({ ...articleData, id: docRef.id });
+      // Lancer la génération en arrière-plan sans attendre
+      articleGeneratorService.generateArticle({ ...articleData, id: docRef.id })
+        .catch(error => console.error('Error generating article:', error));
       navigate('/articles'); 
     } catch (error) {
       console.error('Error creating article:', error); 
