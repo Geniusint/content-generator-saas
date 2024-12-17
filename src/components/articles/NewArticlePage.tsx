@@ -17,6 +17,23 @@ import { useAuth } from '../auth/AuthProvider';
 import { firestoreService, Project, Persona, Site } from '../../services/firestore';
 import { useNavigate } from 'react-router-dom';
 
+// Types de contenu et d'analyse disponibles
+const CONTENT_TYPES = {
+  BLOG: 'blog',
+  COMPARISON: 'comparison',
+  RECIPE: 'recipe',
+  PRODUCT: 'product'
+} as const;
+
+const SEMANTIC_ANALYSIS_TYPES = {
+  NONE: 'none',
+  AI: 'ai',
+  SCRAPE: 'scrape'
+} as const;
+
+type ContentType = typeof CONTENT_TYPES[keyof typeof CONTENT_TYPES];
+type SemanticAnalysisType = typeof SEMANTIC_ANALYSIS_TYPES[keyof typeof SEMANTIC_ANALYSIS_TYPES];
+
 const NewArticlePage: React.FC = () => {
   const { t } = useTranslation();
   const { currentUser } = useAuth();
@@ -26,6 +43,8 @@ const NewArticlePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
   const [selectedProject, setSelectedProject] = useState('');
+  const [contentType, setContentType] = useState<ContentType>(CONTENT_TYPES.BLOG);
+  const [semanticAnalysisType, setSemanticAnalysisType] = useState<SemanticAnalysisType>(SEMANTIC_ANALYSIS_TYPES.NONE);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -46,7 +65,6 @@ const NewArticlePage: React.FC = () => {
 
     fetchProjects();
   }, [currentUser, t]);
-
 
   const handleCreateArticle = async () => {
     if (!currentUser?.uid || !selectedProject) {
@@ -183,7 +201,9 @@ const NewArticlePage: React.FC = () => {
         status: 'draft' as const,
         publishDate: new Date().toISOString(),
         persona: project.persona?.id || '',
-        wordCount: 0
+        wordCount: 0,
+        contentType,
+        semanticAnalysisType,
       };
 
       await firestoreService.createArticle(articleData);
@@ -199,22 +219,17 @@ const NewArticlePage: React.FC = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        {t('articles.createNewArticle')}
+        {t('articles.newArticle')}
       </Typography>
       <Paper sx={{ p: 3 }}>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid item xs={12}>
-            <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
-              <InputLabel>{t('articles.selectProject')}</InputLabel>
+            <FormControl fullWidth>
+              <InputLabel>{t('articles.project')}</InputLabel>
               <Select
                 value={selectedProject}
-                onChange={(e) => setSelectedProject(e.target.value as string)}
-                label={t('articles.selectProject')}
+                label={t('articles.project')}
+                onChange={(e) => setSelectedProject(e.target.value)}
               >
                 {projects.map((project) => (
                   <MenuItem key={project.id} value={project.id}>
@@ -224,25 +239,63 @@ const NewArticlePage: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
+
           <Grid item xs={12}>
             <TextField
               fullWidth
               label={t('articles.title')}
-              variant="outlined"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
           </Grid>
+
+          <Grid item xs={12} md={6}>
+            <FormControl fullWidth>
+              <InputLabel>{t('articles.contentType')}</InputLabel>
+              <Select
+                value={contentType}
+                label={t('articles.contentType')}
+                onChange={(e) => setContentType(e.target.value as ContentType)}
+              >
+                <MenuItem value={CONTENT_TYPES.BLOG}>{t('articles.contentTypes.blog')}</MenuItem>
+                <MenuItem value={CONTENT_TYPES.COMPARISON}>{t('articles.contentTypes.comparison')}</MenuItem>
+                <MenuItem value={CONTENT_TYPES.RECIPE}>{t('articles.contentTypes.recipe')}</MenuItem>
+                <MenuItem value={CONTENT_TYPES.PRODUCT}>{t('articles.contentTypes.product')}</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
+          <Grid item xs={12} md={6}>
+            <FormControl fullWidth>
+              <InputLabel>{t('articles.semanticAnalysis')}</InputLabel>
+              <Select
+                value={semanticAnalysisType}
+                label={t('articles.semanticAnalysis')}
+                onChange={(e) => setSemanticAnalysisType(e.target.value as SemanticAnalysisType)}
+              >
+                <MenuItem value={SEMANTIC_ANALYSIS_TYPES.NONE}>{t('articles.semanticAnalysisTypes.none')}</MenuItem>
+                <MenuItem value={SEMANTIC_ANALYSIS_TYPES.AI}>{t('articles.semanticAnalysisTypes.ai')}</MenuItem>
+                <MenuItem value={SEMANTIC_ANALYSIS_TYPES.SCRAPE}>{t('articles.semanticAnalysisTypes.scrape')}</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+
           <Grid item xs={12}>
             <Button
+              fullWidth
               variant="contained"
-              color="primary"
               onClick={handleCreateArticle}
-              disabled={loading || !title || !selectedProject}
+              disabled={loading || !selectedProject || !title}
             >
-              {loading ? '...' : t('articles.create')}
+              {loading ? t('common.loading') : t('articles.create')}
             </Button>
           </Grid>
+
+          {error && (
+            <Grid item xs={12}>
+              <Alert severity="error">{error}</Alert>
+            </Grid>
+          )}
         </Grid>
       </Paper>
     </Box>

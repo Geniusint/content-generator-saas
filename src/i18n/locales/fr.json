@@ -41,6 +41,19 @@
     "content": "Contenu",
     "create": "Créer",
     "search": "Rechercher...",
+    "contentType": "Type de contenu",
+    "semanticAnalysis": "Type d'analyse sémantique",
+    "contentTypes": {
+      "blog": "Article de blog",
+      "comparison": "Comparatif",
+      "recipe": "Recette",
+      "product": "Fiche produit"
+    },
+    "semanticAnalysisTypes": {
+      "none": "Sans analyse",
+      "ai": "Analyse AI",
+      "scrape": "Scrap top résultats"
+    },
     "status": {
       "label": "Statut",
       "all": "Tous",

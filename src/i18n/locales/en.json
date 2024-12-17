@@ -41,6 +41,19 @@
     "content": "Content",
     "create": "Create",
     "search": "Search...",
+    "contentType": "Content Type",
+    "semanticAnalysis": "Semantic Analysis Type",
+    "contentTypes": {
+      "blog": "Blog Post",
+      "comparison": "Comparison",
+      "recipe": "Recipe",
+      "product": "Product Sheet"
+    },
+    "semanticAnalysisTypes": {
+      "none": "No Analysis",
+      "ai": "AI Analysis",
+      "scrape": "Scrape Top Results"
+    },
     "status": {
       "label": "Status",
       "all": "All",
