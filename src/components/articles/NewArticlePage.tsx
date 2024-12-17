@@ -88,6 +88,7 @@ const NewArticlePage: React.FC = () => {
         title,
         content: '',
         projectId: selectedProject,
+        userId: currentUser.uid,
         status: 'generation' as ArticleStatus,
         publishDate: new Date().toISOString(),
         persona: persona ? {
@@ -108,9 +109,9 @@ const NewArticlePage: React.FC = () => {
         humanize
       };
 
-      const docRef = await firestoreService.createArticle(articleData); 
-      // Lancer la génération en arrière-plan après la création
-      articleGeneratorService.generateArticle(docRef.id);
+      const docRef = await firestoreService.createArticle(articleData);
+      // Lancer la génération en arrière-plan avec l'article complet
+      await articleGeneratorService.generateArticle({ ...articleData, id: docRef.id });
       navigate('/articles'); 
     } catch (error) {
       console.error('Error creating article:', error); 

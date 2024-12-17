@@ -62,6 +62,7 @@ export interface Article {
   wordCount: number;
   contentType: ContentType;
   semanticAnalysisType: SemanticAnalysisType;
+  humanize: boolean;
   persona?: {
     profession: string;
     objectifs: string[];
