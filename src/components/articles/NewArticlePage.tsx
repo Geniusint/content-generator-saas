@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Importation des hooks React
+import React, { useState, useEffect } from 'react'; 
 import {
   Box,
   Typography,
@@ -13,82 +13,76 @@ import {
   Alert,
   FormControlLabel,
   Checkbox,
-} from '@mui/material'; // Importation des composants Material-UI
-import { useTranslation } from 'react-i18next'; // Importation pour la gestion de l'internationalisation
-import { useAuth } from '../auth/AuthProvider'; // Hook personnalisé pour l'authentification
-import { firestoreService, Project, Persona, Site } from '../../services/firestore'; // Services Firestore
-import { useNavigate } from 'react-router-dom'; // Hook pour la navigation
-import { generatePrompt, SemanticAnalysisType } from '../../prompts'; // Fonction pour générer des prompts
-import { ContentType, contentTypes } from '../../content-types'; // Types de contenu
-import { ArticleStatus } from '../../types/articleStatus'; // Statuts d'article
+} from '@mui/material'; 
+import { useTranslation } from 'react-i18next'; 
+import { useAuth } from '../auth/AuthProvider'; 
+import { firestoreService, Project, Persona, Site } from '../../services/firestore'; 
+import { useNavigate } from 'react-router-dom'; 
+import { generatePrompt, SemanticAnalysisType } from '../../prompts'; 
+import { ContentType, contentTypes } from '../../content-types'; 
+import { ArticleStatus } from '../../types/articleStatus'; 
 
-// Types de contenu et d'analyse disponibles
-const CONTENT_TYPES = contentTypes; // Récupération des types de contenu
+const CONTENT_TYPES = contentTypes; 
 
 const SEMANTIC_ANALYSIS_TYPES = {
   NONE: 'none',
   AI: 'ai',
   SCRAPE: 'scrape'
-} as const; // Types d'analyse sémantique disponibles
+} as const; 
 
 const NewArticlePage: React.FC = () => {
-  const { t } = useTranslation(); // Hook pour la traduction
-  const { currentUser } = useAuth(); // Récupération de l'utilisateur actuel
-  const navigate = useNavigate(); // Fonction de navigation
-  const [title, setTitle] = useState(''); // État pour le titre de l'article
-  const [loading, setLoading] = useState(false); // État pour le chargement
-  const [error, setError] = useState<string | null>(null); // État pour les erreurs
-  const [projects, setProjects] = useState<{ id: string; name: string }[]>([]); // État pour les projets
-  const [selectedProject, setSelectedProject] = useState(''); // État pour le projet sélectionné
-  const [contentType, setContentType] = useState<ContentType>('blog'); // État pour le type de contenu
-  const [semanticAnalysisType, setSemanticAnalysisType] = useState<SemanticAnalysisType>('none'); // État pour le type d'analyse sémantique
-  const [humanize, setHumanize] = useState(false); // État pour l'option de "humaniser"
+  const { t } = useTranslation(); 
+  const { currentUser } = useAuth(); 
+  const navigate = useNavigate(); 
+  const [title, setTitle] = useState(''); 
+  const [loading, setLoading] = useState(false); 
+  const [error, setError] = useState<string | null>(null); 
+  const [projects, setProjects] = useState<{ id: string; name: string }[]>([]); 
+  const [selectedProject, setSelectedProject] = useState(''); 
+  const [contentType, setContentType] = useState<ContentType>('blog'); 
+  const [semanticAnalysisType, setSemanticAnalysisType] = useState<SemanticAnalysisType>('none'); 
+  const [humanize, setHumanize] = useState(false); 
 
-  // Effet pour charger les projets de l'utilisateur
   useEffect(() => {
     const fetchProjects = async () => {
-      if (!currentUser) return; // Si l'utilisateur n'est pas connecté, ne rien faire
+      if (!currentUser) return; 
 
       try {
-        const projectsSnapshot = await firestoreService.getProjects(); // Récupération des projets depuis Firestore
+        const projectsSnapshot = await firestoreService.getProjects(); 
         const projectsData = projectsSnapshot.docs.map((doc) => ({
           id: doc.id,
           name: doc.data().name,
         }));
-        setProjects(projectsData); // Mise à jour de l'état avec les projets récupérés
+        setProjects(projectsData); 
       } catch (error) {
-        console.error(t('articles.errorLoading'), error); // Log de l'erreur
-        setError(t('articles.errorLoading')); // Mise à jour de l'état d'erreur
+        console.error(t('articles.errorLoading'), error); 
+        setError(t('articles.errorLoading')); 
       }
     };
 
-    fetchProjects(); // Appel de la fonction pour charger les projets
-  }, [currentUser, t]); // Dépendances de l'effet
+    fetchProjects(); 
+  }, [currentUser, t]); 
 
-  // Fonction pour créer un nouvel article
   const handleCreateArticle = async () => {
-    if (!currentUser?.uid || !selectedProject) { // Vérification de l'utilisateur et du projet sélectionné
-      setError(t('articles.errorCreating')); // Mise à jour de l'état d'erreur
-      return; // Sortie de la fonction
+    if (!currentUser?.uid || !selectedProject) { 
+      setError(t('articles.errorCreating')); 
+      return; 
     }
 
-    setLoading(true); // Activation de l'état de chargement
-    setError(null); // Réinitialisation de l'état d'erreur
+    setLoading(true); 
+    setError(null); 
     try {
-      const project = await firestoreService.getProject(selectedProject) as Project; // Récupération du projet sélectionné
-      let persona: Persona | null = null; // Initialisation de la persona
-      let site: Site | null = null; // Initialisation du site
+      const project = await firestoreService.getProject(selectedProject) as Project; 
+      let persona: Persona | null = null; 
+      let site: Site | null = null; 
 
-      // Récupération de la persona si elle existe
       if (project.persona?.id) {
         persona = await firestoreService.getPersona(project.persona.id) as Persona;
       }
-      // Récupération du site si il existe
       if (project.site?.id) {
         site = await firestoreService.getSite(project.site.id) as Site;
       }
 
-      // Création des données pour le prompt
       const promptData = {
         title,
         topic: title,
@@ -108,9 +102,8 @@ const NewArticlePage: React.FC = () => {
         } : undefined
       };
 
-      const generatedPrompt = generatePrompt(promptData); // Génération du prompt
+      const generatedPrompt = generatePrompt(promptData); 
 
-      // Création des données de l'article
       const articleData = {
         title,
         content: generatedPrompt,
@@ -135,21 +128,20 @@ const NewArticlePage: React.FC = () => {
         humanize
       };
 
-      await firestoreService.createArticle(articleData); // Création de l'article dans Firestore
-      navigate('/articles'); // Navigation vers la liste des articles
+      await firestoreService.createArticle(articleData); 
+      navigate('/articles'); 
     } catch (error) {
-      console.error('Error creating article:', error); // Log de l'erreur
-      setError(t('articles.errorCreating')); // Mise à jour de l'état d'erreur
+      console.error('Error creating article:', error); 
+      setError(t('articles.errorCreating')); 
     } finally {
-      setLoading(false); // Désactivation de l'état de chargement
+      setLoading(false); 
     }
   };
 
-  // Rendu du composant
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        {t('articles.newArticle')} // Titre de la page
+        {t('articles.newArticle')}
       </Typography>
       <Paper sx={{ p: 3 }}>
         <Grid container spacing={3}>
@@ -159,11 +151,11 @@ const NewArticlePage: React.FC = () => {
               <Select
                 value={selectedProject}
                 label={t('articles.project')}
-                onChange={(e) => setSelectedProject(e.target.value)} // Mise à jour du projet sélectionné
+                onChange={(e) => setSelectedProject(e.target.value)} 
               >
                 {projects.map((project) => (
                   <MenuItem key={project.id} value={project.id}>
-                    {project.name} // Affichage du nom du projet
+                    {project.name}
                   </MenuItem>
                 ))}
               </Select>
@@ -175,7 +167,7 @@ const NewArticlePage: React.FC = () => {
               fullWidth
               label={t('articles.title')}
               value={title}
-              onChange={(e) => setTitle(e.target.value)} // Mise à jour du titre
+              onChange={(e) => setTitle(e.target.value)} 
             />
           </Grid>
 
@@ -185,11 +177,11 @@ const NewArticlePage: React.FC = () => {
               <Select
                 value={contentType}
                 label={t('articles.contentType')}
-                onChange={(e) => setContentType(e.target.value as ContentType)} // Mise à jour du type de contenu
+                onChange={(e) => setContentType(e.target.value as ContentType)} 
               >
                 {CONTENT_TYPES.map((contentType) => (
                   <MenuItem key={contentType.type} value={contentType.type}>
-                    {contentType.label} // Affichage du label du type de contenu
+                    {contentType.label}
                   </MenuItem>
                 ))}
               </Select>
@@ -202,7 +194,7 @@ const NewArticlePage: React.FC = () => {
               <Select
                 value={semanticAnalysisType}
                 label={t('articles.semanticAnalysis')}
-                onChange={(e) => setSemanticAnalysisType(e.target.value as SemanticAnalysisType)} // Mise à jour du type d'analyse sémantique
+                onChange={(e) => setSemanticAnalysisType(e.target.value as SemanticAnalysisType)} 
               >
                 <MenuItem value={SEMANTIC_ANALYSIS_TYPES.NONE}>{t('articles.semanticAnalysisTypes.none')}</MenuItem>
                 <MenuItem value={SEMANTIC_ANALYSIS_TYPES.AI}>{t('articles.semanticAnalysisTypes.ai')}</MenuItem>
@@ -216,7 +208,7 @@ const NewArticlePage: React.FC = () => {
               control={
                 <Checkbox
                   checked={humanize}
-                  onChange={(e) => setHumanize(e.target.checked)} // Mise à jour de l'option "humaniser"
+                  onChange={(e) => setHumanize(e.target.checked)} 
                 />
               }
               label={t('articles.humanize')}
@@ -227,16 +219,16 @@ const NewArticlePage: React.FC = () => {
             <Button
               fullWidth
               variant="contained"
-              onClick={handleCreateArticle} // Appel de la fonction pour créer l'article
-              disabled={loading || !selectedProject || !title} // Désactivation si en chargement ou si les champs sont vides
+              onClick={handleCreateArticle} 
+              disabled={loading || !selectedProject || !title} 
             >
-              {loading ? t('common.loading') : t('articles.create')} // Affichage du texte du bouton
+              {loading ? t('common.loading') : t('articles.create')} 
             </Button>
           </Grid>
 
           {error && (
             <Grid item xs={12}>
-              <Alert severity="error">{error}</Alert> // Affichage des messages d'erreur
+              <Alert severity="error">{error}</Alert> 
             </Grid>
           )}
         </Grid>
@@ -245,4 +237,4 @@ const NewArticlePage: React.FC = () => {
   );
 };
 
-export default NewArticlePage; // Exportation du composant
+export default NewArticlePage; 
